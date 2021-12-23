@@ -32,6 +32,14 @@ namespace SignalRApp
             return Task.CompletedTask;
         }
 
+        protected override Task PublishCore(cmdMessage commandMessage)
+        {
+            var basicProperties = InitializeBasicProperties(_channel.CreateBasicProperties(), commandMessage.Id);
+            byte[] messageBody = SerializeMessage(commandMessage);
+            _channel.BasicPublish(_topicName, routingKey: string.Empty, basicProperties, messageBody);
+            return Task.CompletedTask;
+        }
+
         private static IBasicProperties InitializeBasicProperties(IBasicProperties basicProperties, string id)
         {
             basicProperties.Persistent = true;

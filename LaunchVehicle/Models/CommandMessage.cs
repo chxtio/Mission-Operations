@@ -2,7 +2,6 @@
 
 namespace LaunchVehicle
 {
-    // For command topic
     public sealed class CommandMessage
     {
         public string Id { get; }

@@ -19,18 +19,36 @@ namespace LaunchVehicle
 
             var publishMessages = false;
 
+            //subscriber.Subscribe(async (subs, messageReceivedEventArgs) =>
+            //{
+                
+            //    var body = messageReceivedEventArgs.ReceivedMessage.Body;
+            //    var commandMessage = SubscriberServiceBus.Deserialize<CommandMessage>(body);
+            //    Console.WriteLine("Received cmd: " + commandMessage.Cmd);
+            //    publishMessages = commandMessage.State;
+            //    Console.WriteLine("Received command: " + commandMessage.State);
+            //    await subs.Acknowledge(messageReceivedEventArgs.AcknowledgeToken);
+            //});
+
             subscriber.Subscribe(async (subs, messageReceivedEventArgs) =>
             {
+
                 var body = messageReceivedEventArgs.ReceivedMessage.Body;
-                var commandMessage = SubscriberServiceBus.Deserialize<CommandMessage>(body);
-                publishMessages = commandMessage.State;
-                Console.WriteLine("Received command: " + commandMessage.State);
+                var commandMessage = SubscriberServiceBus.Deserialize<cmdMessage>(body);
+                Console.WriteLine("Received command: (Target: " + commandMessage.Target + ") " + commandMessage.Cmd);
+                if (commandMessage.Cmd == "StartTelemetry")
+                {
+                    publishMessages = true;
+                    Console.WriteLine("Sending telemetry back to Deep Space Network");
+                }
+                //publishMessages = commandMessage.State;
+                //Console.WriteLine("Received command: " + commandMessage.State);
                 await subs.Acknowledge(messageReceivedEventArgs.AcknowledgeToken);
             });
 
             var messageBrokerPublisher = MessageBrokerPublisherFactory.Create(messageBrokerType);
 
-            Console.WriteLine("Waiting for Start Publishing Message");
+            Console.WriteLine("Waiting to Start Publishing Messages");
             //Console.WriteLine("Press Enter to start Publishing Messages");
             //Console.ReadLine();
 
@@ -42,7 +60,8 @@ namespace LaunchVehicle
                 {
                     //Console.WriteLine("Publishing messages");
                     // Publish titles to publisher
-                    foreach (var title in GetTitles(@"..\..\..\RandomTitles.txt"))
+                    //foreach (var title in GetTitles(@"..\..\..\RandomTitles.txt"))
+                    foreach (var title in GetTitles(@"..\..\..\TelemetryData.txt"))
                     {
                         var messageId = Guid.NewGuid().ToString("N");
                         var eventMessage = new EventMessage(messageId, title, DateTime.UtcNow);

@@ -25,6 +25,11 @@ namespace SignalRApp
             return PublishCore(commandMessage);
         }
 
+        public Task Publish(cmdMessage commandMessage)
+        {
+            return PublishCore(commandMessage);
+        }
+
         protected byte[] SerializeMessage<T>(T message)
         {
             string messageJson = JsonSerializer.Serialize<T>(message, _jsonSerializerOptions);
@@ -38,6 +43,7 @@ namespace SignalRApp
         }
 
         protected abstract Task PublishCore(CommandMessage commandMessage);
+        protected abstract Task PublishCore(cmdMessage commandMessage);
         protected abstract void Dispose(bool disposing);
     }
 }

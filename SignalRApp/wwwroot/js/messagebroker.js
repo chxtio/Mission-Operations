@@ -54,14 +54,22 @@ $(document).ready(function () {
 
     $('#targetSelect').change(function () {
         const target = $(this).find(":selected").text();
-        console.log("Target: " + target);
+        //console.log("Target: " + target);
     })
 
     $('#commandSelect').change(function () {
-        const target = $(this).find(":selected").text();
-        console.log("Command: " + target);
+        const target = $('#targetSelect').find(":selected").text();
+        console.log("Target: " + target);
+
+        const cmd = $(this).find(":selected").text();
+        console.log("Command: " + cmd);
           var text = $('#cmdHistory')
-        text.val(text.val() + target + "\n");
+        text.val(text.val() + cmd + "\n");
+
+        signalrConnection.invoke("cmdReceived", target, cmd).catch(function (err) {
+            return console.error(err.toString());
+        });
+        event.preventDefault();
     })
 
     //$("select")

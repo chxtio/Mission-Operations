@@ -23,6 +23,8 @@ namespace SignalRApp
         private PublisherCommandMessageBase _publisherCommandMessage;
         private PublisherCommandMessageBase PublisherCommandMessage { get { return _publisherCommandMessage ??= MakePublisherCommandMessage(MessageBrokerSettings, CommandTopicName); } }
 
+        //private PublisherCmdMessageBase _publisherCmdMessage;
+        //private PublisherCmdMessageBase PublisherCmdMessage { get { return _publisherCmdMessage ??= MakePublisherCommandMessage(MessageBrokerSettings, CommandTopicName); } }
 
         public SignalProcessorManager()
         {
@@ -46,6 +48,11 @@ namespace SignalRApp
         }
 
         public async Task PublishCommandMessage(CommandMessage commandMessage)
+        {
+            await PublisherCommandMessage.Publish(commandMessage);
+        }
+
+        public async Task PublishCmdMessage(cmdMessage commandMessage)
         {
             await PublisherCommandMessage.Publish(commandMessage);
         }

@@ -8,7 +8,8 @@ namespace SignalRApp//.WorkerServices
         private SignalProcessorManager _signalProcessorManager = new SignalProcessorManager();
         private IHubContext<MessageBrokerHub> _messageBrokerHubContext;
 
-        // Inject IHubContext- Worker service has reference to hub context to send messages to clients via SignalR
+        // Constructor for background service injects IHubContext to access hub and provides access to singleton SignalProcessorManager instance
+        // Worker service will now have a reference to SignalR Hub context to broadcast to clients
         public MessageBrokerPubSubWorker(IHubContext<MessageBrokerHub> messageBrokerHubContext, SignalProcessorManager signalProcessorManager)
         {
             _messageBrokerHubContext = messageBrokerHubContext;
@@ -32,7 +33,7 @@ namespace SignalRApp//.WorkerServices
             var signalProccessorManager = new SignalProcessorManager();
             await signalProccessorManager.StartListening(async eventMessage =>
             {
-                // Publish events to browser
+                // SignalR will send method name and message object to the client; Will publish events to clients w/ matching method name
                 await _messageBrokerHubContext.Clients.All.SendAsync("onMessageReceived", eventMessage, stoppingToken);
             });
         }

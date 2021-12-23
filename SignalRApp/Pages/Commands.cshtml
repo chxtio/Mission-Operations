@@ -1,0 +1,47 @@
+﻿@page
+@model SignalRApp.Pages.CommandsModel
+@{
+    ViewData["Title"] = "Commands";
+}
+<h1>@ViewData["Title"]</h1>
+
+<p>Enter command bitch</p>
+
+<div>
+<form action="/action_page.php" class="row gy-2 gx-3 align-items-center" id="cmd_form">
+  <div class="col-auto">
+    <label class="visually-hidden" for="autoSizingSelect">Preference</label>
+    <select class="form-select" id="targetSelect">
+      <option selected>Choose Target</option>
+      <option value="1">Bitch1</option>
+      <option value="2">Two</option>
+      <option value="3">Three</option>
+    </select>
+  </div>
+  <div class="col-auto">
+    <label class="visually-hidden" for="autoSizingSelect">Preference</label>
+    <select class="form-select" id="commandSelect">
+      <option selected>Select Command</option>
+      <option value="1">DeployPayload</option>
+      <option value="2">Deorbit</option>
+      <option value="3">StartTelemetry</option>
+      <option value="3">StopTelemetry</option>
+    </select>
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-primary">Send</button>
+  </div>
+</form>
+</div>
+
+<br />
+<div >
+  <label for="Textarea1" class="form-label">Command History</label>
+  <textarea class="form-control" id="cmdHistory" style="max-width:60%;height:100%;width:60%;" rows="4" readonly></textarea>
+</div>
+
+@section scripts {
+<script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
+<script src="~/js/messagebroker.js"></script>
+@*<script src="https://code.jquery.com/jquery-3.5.0.js"></script>*@
+}

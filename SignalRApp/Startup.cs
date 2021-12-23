@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-//using SignalRApp.WorkerServices;
 
 namespace SignalRApp
 {
@@ -27,7 +26,7 @@ namespace SignalRApp
 
             // Register manager as a singleton
             services.AddSingleton<SignalProcessorManager>(); // Available to background worker and hub
-            // Host signalR Hub in background worker process context- register background service
+            // Host signalR Hub in a background worker process context
             services.AddHostedService<MessageBrokerPubSubWorker>();
         }
 

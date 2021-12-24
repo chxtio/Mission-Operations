@@ -76,7 +76,7 @@ namespace LaunchVehicle
                 while (publishMessages)
                 {
                     // Seed simulated telemetry 
-                    string json = JsonSerializer.Serialize(new { altitude = altitude, longitude = longitude, latitude = latitude, temperature = temperature, timeToOrbit = timeToOrbit, createdDateTime = DateTime.UtcNow.ToString() });
+                    string json = JsonSerializer.Serialize(new { timestamp = DateTime.UtcNow.ToString(), altitude = altitude, longitude = longitude, latitude = latitude, temperature = temperature, timeToOrbit = timeToOrbit });
                     var messageId = Guid.NewGuid().ToString("N");
                     var eventMessage = new EventMessage(messageId, json, "test", DateTime.UtcNow);
                     var eventMessageJson = JsonSerializer.Serialize(eventMessage); // Serialize message to Json

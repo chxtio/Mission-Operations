@@ -18,10 +18,10 @@ let messageCount = 0;
 signalrConnection.on("onMessageReceived", function (eventMessage) {
     messageCount++;
     const msgCountH4 = document.getElementById("messageCount");
-    msgCountH4.innerText = "Telemetry packets: " + messageCount.toString();
-    const ul = document.getElementById("messages");
-    const li = document.createElement("li");
-    li.innerText = "#" + messageCount.toString();
+    msgCountH4.innerText = "Telemetry Packets: " + messageCount.toString();
+    //const ul = document.getElementById("messages");
+    //const li = document.createElement("li");
+    //li.innerText = "#" + messageCount.toString();
 
     console.log("Messages: " + messageCount.toString());
     //console.log(JSON.stringify(eventMessage));
@@ -39,32 +39,28 @@ signalrConnection.on("onMessageReceived", function (eventMessage) {
             var timeToOrbit = json["timeToOrbit"];
             var createdDateTime = json["createdDateTime"];
 
-            console.log("altitude: " + altitude + " \nlongitude: " + longitude + "\nlatitude: " + latitude + "\ntemperature: " + temperature + "\ntimeToOrbit: " + timeToOrbit + "\ncreatedDateTime: " + createdDateTime);
-            for (const key in json) {
-                const newDiv = document.createElement("div");
-                const classAttrib = document.createAttribute("style");
-                classAttrib.value = "font-size: 80%;";
-                newDiv.setAttributeNode(classAttrib);
-                const newContent = document.createTextNode(`${key}: ${json[key]}`);
-                newDiv.appendChild(newContent);
-                li.appendChild(newDiv);
-            }
-        }
-        //else {
-        //    const newDiv = document.createElement("div");
-        //    const classAttrib = document.createAttribute("style");
-        //    classAttrib.value = "font-size: 80%;";
-        //    newDiv.setAttributeNode(classAttrib);
-        //    const newContent = document.createTextNode(`${property}: ${eventMessage[property]}`);
-        //    newDiv.appendChild(newContent);
-        //    li.appendChild(newDiv);
+            document.getElementById("altitude").innerText = altitude;
+            document.getElementById("longitude").innerText = longitude;
+            document.getElementById("latitude").innerText = latitude;
+            document.getElementById("temperature").innerText = temperature;
+            document.getElementById("time_to_orbit").innerText = timeToOrbit;
+            document.getElementById("time_formatted").innerText = createdDateTime;
 
-        //}
-            
+            console.log("timestamp: " + createdDateTime + "altitude: " + altitude + " \nlongitude: " + longitude + "\nlatitude: " + latitude + "\ntemperature: " + temperature + "\ntimeToOrbit: " + timeToOrbit);
+            //for (const key in json) {
+            //    const newDiv = document.createElement("div");
+            //    const classAttrib = document.createAttribute("style");
+            //    classAttrib.value = "font-size: 80%;";
+            //    newDiv.setAttributeNode(classAttrib);
+            //    const newContent = document.createTextNode(`${key}: ${json[key]}`);
+            //    newDiv.appendChild(newContent);
+            //    li.appendChild(newDiv);
+            //}
+        }    
 
     }
 
-    ul.prepend(li);
+    //ul.prepend(li);
 });
 
 // Catch commands on client side
@@ -88,7 +84,6 @@ $(document).ready(function () {
         const target = $('#targetSelect').find(":selected").text();
         console.log("Target: " + target);
 
-        //const cmd = $(this).find(":selected").text();
         const cmd = $('#commandSelect').find(":selected").text();
         console.log("Command: " + cmd);
           var text = $('#cmdHistory')

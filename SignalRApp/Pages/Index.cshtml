@@ -25,31 +25,40 @@
 <ul id="messages" style="overflow: auto; max-height: 600px;">
 </ul>
 
+<table class="table table-hover table-dark">
+  <thead>
+    <tr>
+      <th scope="col" colspan="2" style="text-align:center">Telemetry Data</th>
 
-@*<form action="/action_page.php" class="row gy-2 gx-3 align-items-center" id="cmd_form">
-  <div class="col-auto">
-    <label class="visually-hidden" for="autoSizingSelect">Preference</label>
-    <select class="form-select" id="targetSelect">
-      <option selected>Choose Target</option>
-      <option value="1">Bitch1</option>
-      <option value="2">Two</option>
-      <option value="3">Three</option>
-    </select>
-  </div>
-  <div class="col-auto">
-    <label class="visually-hidden" for="autoSizingSelect">Preference</label>
-    <select class="form-select" id="commandSelect">
-      <option selected>Select Command</option>
-      <option value="1">DeployPayload</option>
-      <option value="2">Deorbit</option>
-      <option value="3">StartTelemetry</option>
-      <option value="3">StopTelemetry</option>
-    </select>
-  </div>
-  <div class="col-auto">
-    <button type="submit" class="btn btn-primary">Submit</button>
-  </div>
-</form>*@
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Altitude</th>
+      <td id="altitude"></td>
+    </tr>
+    <tr>
+      <th scope="row">Longitude</th>
+      <td id="longitude"></td>
+    </tr>
+    <tr>
+      <th scope="row">Latitude</th>
+      <td colspan="2" id="latitude"></td>
+    </tr>
+    <tr>
+      <th scope="row">Temperature</th>
+      <td colspan="2" id="temperature"></td>
+    </tr>
+    <tr>
+      <th scope="row">Time to Orbit</th>
+      <td colspan="2" id="time_to_orbit"></td>
+    </tr>
+    <tr>
+      <th scope="row">Time Formatted</th>
+      <td colspan="2" id="time_formatted"></td>
+    </tr>
+  </tbody>
+</table>
 
 @section scripts {
 <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>

@@ -18,19 +18,50 @@ let messageCount = 0;
 signalrConnection.on("onMessageReceived", function (eventMessage) {
     messageCount++;
     const msgCountH4 = document.getElementById("messageCount");
-    msgCountH4.innerText = "Messages: " + messageCount.toString();
+    msgCountH4.innerText = "Telemetry packets: " + messageCount.toString();
     const ul = document.getElementById("messages");
     const li = document.createElement("li");
-    li.innerText = messageCount.toString();
+    li.innerText = "#" + messageCount.toString();
+
+    console.log("Messages: " + messageCount.toString());
+    //console.log(JSON.stringify(eventMessage));
+
+
 
     for (const property in eventMessage) {
-        const newDiv = document.createElement("div");
-        const classAttrib = document.createAttribute("style");
-        classAttrib.value = "font-size: 80%;";
-        newDiv.setAttributeNode(classAttrib);
-        const newContent = document.createTextNode(`${property}: ${eventMessage[property]}`);
-        newDiv.appendChild(newContent);
-        li.appendChild(newDiv);
+        console.log("property: " + property + " value: " + eventMessage[property]);
+        if (property === "title") {
+            var json = JSON.parse(eventMessage["title"]);
+            var altitude = json["altitude"];
+            var longitude = json["longitude"];
+            var latitude = json["latitude"];
+            var temperature = json["temperature"];
+            var timeToOrbit = json["timeToOrbit"];
+            var createdDateTime = json["createdDateTime"];
+
+            console.log("altitude: " + altitude + " \nlongitude: " + longitude + "\nlatitude: " + latitude + "\ntemperature: " + temperature + "\ntimeToOrbit: " + timeToOrbit + "\ncreatedDateTime: " + createdDateTime);
+            for (const key in json) {
+                const newDiv = document.createElement("div");
+                const classAttrib = document.createAttribute("style");
+                classAttrib.value = "font-size: 80%;";
+                newDiv.setAttributeNode(classAttrib);
+                const newContent = document.createTextNode(`${key}: ${json[key]}`);
+                newDiv.appendChild(newContent);
+                li.appendChild(newDiv);
+            }
+        }
+        //else {
+        //    const newDiv = document.createElement("div");
+        //    const classAttrib = document.createAttribute("style");
+        //    classAttrib.value = "font-size: 80%;";
+        //    newDiv.setAttributeNode(classAttrib);
+        //    const newContent = document.createTextNode(`${property}: ${eventMessage[property]}`);
+        //    newDiv.appendChild(newContent);
+        //    li.appendChild(newDiv);
+
+        //}
+            
+
     }
 
     ul.prepend(li);
@@ -52,16 +83,13 @@ $(document).ready(function () {
         event.preventDefault();
     })
 
-    $('#targetSelect').change(function () {
-        const target = $(this).find(":selected").text();
-        //console.log("Target: " + target);
-    })
-
-    $('#commandSelect').change(function () {
+    $('#cmd_form').submit(function (e) {
+        e.preventDefault();
         const target = $('#targetSelect').find(":selected").text();
         console.log("Target: " + target);
 
-        const cmd = $(this).find(":selected").text();
+        //const cmd = $(this).find(":selected").text();
+        const cmd = $('#commandSelect').find(":selected").text();
         console.log("Command: " + cmd);
           var text = $('#cmdHistory')
         text.val(text.val() + cmd + "\n");
@@ -69,8 +97,28 @@ $(document).ready(function () {
         signalrConnection.invoke("cmdReceived", target, cmd).catch(function (err) {
             return console.error(err.toString());
         });
-        event.preventDefault();
+
     })
+
+        //$('#targetSelect').change(function () {
+    //    const target = $(this).find(":selected").text();
+    //    //console.log("Target: " + target);
+    //})
+
+    //$('#commandSelect').change(function () {
+    //    const target = $('#targetSelect').find(":selected").text();
+    //    console.log("Target: " + target);
+
+    //    const cmd = $(this).find(":selected").text();
+    //    console.log("Command: " + cmd);
+    //      var text = $('#cmdHistory')
+    //    text.val(text.val() + cmd + "\n");
+
+    //    signalrConnection.invoke("cmdReceived", target, cmd).catch(function (err) {
+    //        return console.error(err.toString());
+    //    });
+    //    event.preventDefault();
+    //})
 
     //$("select")
     //    .change(function () {

@@ -8,8 +8,8 @@ namespace SignalRApp
     {
         private bool _disposed;
         // Message broker constants
-        private const string EventMessageTopicName = "title.events.topic";
-        private const string EventMessageQueueName = "title.events.queue";
+        private const string EventMessageTopicName = "tlm.events.topic";//"title.events.topic";
+        private const string EventMessageQueueName = "tlm.events.queue";//"title.events.queue";
         private const string CommandTopicName = "command.events.topic";
 
         // Configuration settings

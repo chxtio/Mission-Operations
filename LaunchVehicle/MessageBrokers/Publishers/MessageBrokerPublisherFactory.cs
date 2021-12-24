@@ -4,7 +4,7 @@
     {
         const string brokerConnectionStringRabbitMq = "amqp://test.vhost:test@localhost/test.vhost";
         const string brokerConnectionStringServiceBus = "<Your ServiceBus Connection string>";
-        const string titleTopic = "title.events.topic";
+        const string titleTopic = "tlm.events.topic";//"title.events.topic";
 
         public static PublisherBase Create(MessageBrokerType messageBrokerType)
         {

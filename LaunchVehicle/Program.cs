@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Diagnostics;
 //using Newtonsoft.Json;
 
 namespace LaunchVehicle
@@ -17,44 +18,58 @@ namespace LaunchVehicle
             var messageBrokerType = MessageBrokerType.RabbitMq;
             // Create subscriber based on message broker type
             var subscriber = MessageBrokerSubscriberFactory.Create(messageBrokerType);
-
             var publishMessages = false;
-
-            subscriber.Subscribe(async (subs, messageReceivedEventArgs) =>
-            {
-
-                var body = messageReceivedEventArgs.ReceivedMessage.Body;
-                var commandMessage = SubscriberServiceBus.Deserialize<CommandMessage>(body);
-                //Console.WriteLine("Received cmd: " + commandMessage.Cmd);
-                publishMessages = commandMessage.State;
-                Console.WriteLine("Received command: " + commandMessage.State);
-                await subs.Acknowledge(messageReceivedEventArgs.AcknowledgeToken);
-            });
+            var deployable = false;
+            var target = "";
 
             //subscriber.Subscribe(async (subs, messageReceivedEventArgs) =>
             //{
-
             //    var body = messageReceivedEventArgs.ReceivedMessage.Body;
-            //    var commandMessage = SubscriberServiceBus.Deserialize<cmdMessage>(body);
-            //    var target = commandMessage.Target;
-            //    var cmd = commandMessage.Cmd;
-            //    Console.WriteLine("Received command: (Target: " + target + ") " + cmd);
-            //    switch (cmd)
-            //    {
-            //        case "StartTelemetry":
-            //            publishMessages = true;
-            //            Console.WriteLine("Sending telemetry data back to Deep Space Network");
-            //            break;
-
-            //        case "StopTelemetry":
-            //            publishMessages = false;
-            //            Console.WriteLine("Finished sending telemetry data");
-            //            break;
-
-            //    }
-
+            //    var commandMessage = SubscriberServiceBus.Deserialize<CommandMessage>(body);
+            //    //Console.WriteLine("Received cmd: " + commandMessage.Cmd);
+            //    publishMessages = commandMessage.State;
+            //    Console.WriteLine("Received command: " + commandMessage.State);
             //    await subs.Acknowledge(messageReceivedEventArgs.AcknowledgeToken);
             //});
+
+            subscriber.Subscribe(async (subs, messageReceivedEventArgs) =>
+            {
+                var body = messageReceivedEventArgs.ReceivedMessage.Body;
+                var commandMessage = SubscriberServiceBus.Deserialize<cmdMessage>(body);
+                target = commandMessage.Target;
+                var cmd = commandMessage.Cmd;
+                Console.WriteLine("Received command: (Target: " + target + ") " + cmd);
+                switch (cmd)
+                {
+                    case "StartTelemetry":
+                        publishMessages = true;
+                        Console.WriteLine("Sending telemetry data back to Deep Space Network");
+                        break;
+
+                    case "StopTelemetry":
+                        publishMessages = false;
+                        Console.WriteLine("Finished sending telemetry data");
+                        break;
+                    case "DeployPayload":
+                        if (deployable)
+                        {
+                            Console.WriteLine("Releasing Payload...");
+                            var p = new Process();
+                            //p.StartInfo.FileName = @"..\..\..\..\..\..\text.txt";
+                            p.StartInfo.FileName = @"C:\Program Files\Notepad++\notepad++.exe"; //"D:\OneDrive\Projects\csharp\Deep-Space-Network\LaunchVehicle\bin\Debug\net6.0\LaunchVehicle.exe";
+                            p.Start();
+                        } else
+                        {
+                            Console.WriteLine("Unable to deploy payload until launch vehicle is in orbit.");
+                        }
+                        break;
+                    default:
+                        Console.WriteLine("Command not recognized: " + cmd);
+                        break;
+                }
+
+                await subs.Acknowledge(messageReceivedEventArgs.AcknowledgeToken);
+            });
 
             var messageBrokerPublisher = MessageBrokerPublisherFactory.Create(messageBrokerType);
 
@@ -67,9 +82,10 @@ namespace LaunchVehicle
             var longitude = -45.34;
             var latitude = -25.34;
             var temperature = 340.0;
-            var timeToOrbit = 45.0;
+            var timeToOrbit = 15.0;
 
-            publishMessages = true;
+            // Uncomment for debugging
+            //publishMessages = true;
 
             do
             {
@@ -83,7 +99,7 @@ namespace LaunchVehicle
                     var messageBytes = Encoding.UTF8.GetBytes(eventMessageJson);
                     var message = new Message(messageBytes, messageId, "application/json"); // Adapter design pattern
                     await messageBrokerPublisher.Publish(message);
-                    Console.WriteLine($"{messageId}: {json}\n");
+                    //Console.WriteLine($"{messageId}: {json}\n");
                     await Task.Delay(1000);
 
 
@@ -104,7 +120,15 @@ namespace LaunchVehicle
                     longitude -= 10d;
                     latitude -= 10d;
                     temperature -= 2d;
-                    timeToOrbit -= 1d;
+                    if (timeToOrbit > 0d)
+                    {
+                        timeToOrbit -= 1d;
+                    } else if (timeToOrbit == 0d)
+                    {
+                        deployable = true;
+                        Console.WriteLine("Ready to deploy payload for launch vehicle: " + target);
+                    } 
+                    
 
                     if (!publishMessages)
                     {

@@ -26,8 +26,6 @@ signalrConnection.on("onMessageReceived", function (eventMessage) {
     console.log("Messages: " + messageCount.toString());
     //console.log(JSON.stringify(eventMessage));
 
-
-
     for (const property in eventMessage) {
 
         console.log("property: " + property + " value: " + eventMessage[property]);
@@ -80,9 +78,9 @@ $(document).ready(function () {
         console.log("state: " + state);
         console.log("lightColor: " + lightColor);
 
-        signalrConnection.invoke("CommandReceived", lightColor, state).catch(function (err) {
-            return console.error(err.toString());
-        });
+        //signalrConnection.invoke("CommandReceived", lightColor, state).catch(function (err) {
+        //    return console.error(err.toString());
+        //});
         event.preventDefault();
     })
 

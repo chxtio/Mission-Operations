@@ -43,12 +43,16 @@ namespace LaunchVehicle
                 var body = messageReceivedEventArgs.ReceivedMessage.Body;
                 var commandMessage = SubscriberServiceBus.Deserialize<cmdMessage>(body);
                 target = commandMessage.Target;
+
                 var cmd = commandMessage.Cmd;                
                 Console.WriteLine("Received command: (Target: " + target + ") " + cmd);
 
-                if (lvDict.ContainsKey(target))
+                if (target != "")
                 {
-                    lvId = lvDict[target];
+                    if (lvDict.ContainsKey(target))
+                    {
+                        lvId = lvDict[target];
+                    }
                 }
 
                 switch (cmd)
@@ -97,7 +101,7 @@ namespace LaunchVehicle
             var timeToOrbit = 15.0;
 
             // Uncomment for debugging
-            publishMessages = true;
+            //publishMessages = true;
 
             do
             {

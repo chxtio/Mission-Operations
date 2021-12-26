@@ -10,7 +10,7 @@
 <div class="text-center">
     <h1 class="display-4">Deep Space Network</h1>
 </div>
-<div>
+@*<div>
     <label class="checkbox-inline">
         <input type="checkbox" id="chkRed" name="chkColor" data-lightColor="Red" data-toggle="toggle" data-onstyle="danger" data-offstyle="danger">
         <span style="padding-right: 40px;">Red</span>
@@ -23,7 +23,7 @@
         <input type="checkbox" id="chkBlue" name="chkColor" data-lightColor="Blue" data-toggle="toggle" data-onstyle="primary" data-offstyle="primary">
         <span style="padding-right: 40px;">Blue</span>
     </label>
-</div>
+</div>*@
 <h4 id="messageCount">0</h4>
 <ul id="messages" style="overflow: auto; max-height: 600px;">
 </ul>
@@ -32,7 +32,7 @@
 
 
 <!----------Launch Table-------------------------------------------------------------------------------->
-<table id="launch_table" class="table table-hover table-dark" >
+<table id="launch_table" > <!---class="table table-hover table-dark"-->
   <thead>
     <tr>
       <th scope="col" colspan="8" style="text-align:center">Launches</th>
@@ -42,10 +42,10 @@
     <tr>
       <th scope="col" style="text-align:center"></th>
       <th scope="col">Launch Vehicle</th>
-      <th scope="col">Status</th>
-      <th scope="col">View Telemetry</th>
+      <th scope="col">Launch Status</th>
+      <th scope="col">Telemetry</th>
       <th scope="col">Payload Status</th>
-      <th scope="col">View Telemetry/Data</th>
+      <th scope="col">Telemetry/Data</th>
     </tr>
   </thead>
   <tbody>

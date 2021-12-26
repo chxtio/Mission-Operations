@@ -136,4 +136,18 @@ body {
     border: 1px solid #000;
     border-radius: 7px;
 }
- 
+
+#launch_table {
+    color: white; 
+    background-color: rgba(3, 5, 7, 0.5); 
+    margin: auto;
+    width: 100%
+}
+
+/*#launch_table th {
+    padding: 15px;
+}
+
+#launch_table td {
+    padding: 15px;
+}*/

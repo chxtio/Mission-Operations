@@ -26,7 +26,7 @@ namespace LaunchVehicle
             var publishMessages = false;
             var deployable = false;
             var target = "";
-            var lvId = 1;
+            var lvId = 2;
 
             //subscriber.Subscribe(async (subs, messageReceivedEventArgs) =>
             //{
@@ -101,7 +101,7 @@ namespace LaunchVehicle
             var timeToOrbit = 15.0;
 
             // Uncomment for debugging
-            //publishMessages = true;
+            publishMessages = true;
 
             do
             {

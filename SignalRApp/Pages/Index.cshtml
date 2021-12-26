@@ -44,6 +44,7 @@
       <th scope="col">Launch Vehicle</th>
       <th scope="col">Launch Status</th>
       <th scope="col">Telemetry</th>
+      <th scope="col">Time to Orbit</th>
       <th scope="col">Payload Status</th>
       <th scope="col">Telemetry/Data</th>
     </tr>
@@ -59,7 +60,8 @@
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal1">View
           </button>
       </td>
-      <td class="deploy-status open">
+      <td id="tto1">N/A</td>
+      <td id="deploy1" class="deploy-status open">
           Ready to Deploy
       </td>
       <td>
@@ -75,7 +77,8 @@
       <td>
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal2" >View</button>
       </td>
-      <td class="deploy-status in-progress">
+      <td id="tto2">N/A</td>
+      <td id="deploy2" class="deploy-status in-progress">
           In Progress
       </td>
       <td>
@@ -91,7 +94,8 @@
       <td>
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal3">View</button>
       </td>
-      <td class="deploy-status offline">
+      <td id="tto3">N/A</td>
+      <td id="deploy3" class="deploy-status offline">
           N/A
       </td>
       <td>

@@ -1,4 +1,7 @@
 ﻿"use strict"
+
+var lvDict = { "Bird-9": 1, "Bird-Heavy": 2, "Hawk-Heavy": 3 }
+
 // Generate client-side SignalR Hub proxy
 const signalrConnection = new signalR.HubConnectionBuilder()
     .withUrl("/messagebroker")
@@ -46,7 +49,19 @@ signalrConnection.on("onMessageReceived", function (eventMessage) {
             document.getElementById("latitude" + lvId).innerText = latitude;
             document.getElementById("temperature" + lvId).innerText = temperature;
             document.getElementById("time_to_orbit" + lvId).innerText = timeToOrbit;
+            document.getElementById("tto" + lvId).innerText = timeToOrbit;
             document.getElementById("time_formatted" + lvId).innerText = createdDateTime;
+
+            var lvId = lvDict[localStorage.target];
+            console.log("lvId: " + lvId);
+            console.log("tto: " + timeToOrbit);
+
+            if (timeToOrbit === 0) {
+                console.log("Change payload status to ready to deploy");
+                var deployStatus = document.getElementById("deploy" + lvId);
+                deployStatus.innerHTML = "Ready to Deploy";
+                deployStatus.className = "deploy-status open";
+            }
 
             //console.log("timestamp: " + createdDateTime + "altitude: " + altitude + " \nlongitude: " + longitude + "\nlatitude: " + latitude + "\ntemperature: " + temperature + "\ntimeToOrbit: " + timeToOrbit);
 
@@ -66,7 +81,7 @@ signalrConnection.on("onMessageReceived", function (eventMessage) {
     //ul.prepend(li);
 });
 
-var lvDict = {"Bird-9": 1, "Bird-Heavy": 2, "Hawk-Heavy": 3}
+
 
 // Catch commands on client side
 $(document).ready(function () {
@@ -108,11 +123,12 @@ $(document).ready(function () {
             $('#stopTlmBtn').prop('disabled', true);
         }
 
-
         if (cmd === "Select") {
             $('#cmd_btn').prop('disabled', true);
         } else
             $('#cmd_btn').prop('disabled', false);
+
+        localStorage.target = target;
     })
 
     $('#commandSelect').change(function () {

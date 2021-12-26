@@ -4,6 +4,9 @@
     ViewData["Title"] = "Home page";
 }
 
+
+
+
 <div class="text-center">
     <h1 class="display-4">Deep Space Network</h1>
 </div>
@@ -26,8 +29,10 @@
 </ul>
 
 
+
+
 <!----------Launch Table-------------------------------------------------------------------------------->
-<table class="table table-hover table-dark">
+<table id="launch_table" class="table table-hover table-dark" >
   <thead>
     <tr>
       <th scope="col" colspan="4" style="text-align:center">Launches</th>
@@ -44,10 +49,10 @@
   <tbody>
     <tr>
       <th scope="row">1</th>
-      <td>Bird-9</td>
-      <td>Launched</td>
+      <td >Bird-9</td>
+      <td  id="status1" class="launch_status_cell">Launched</td>
       <td>
-          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal1">
   View
 </button>
 </td>
@@ -56,9 +61,9 @@
     <tr>
       <th scope="row">2</th>
       <td>Bird-Heavy</td>
-      <td>Upcoming</td>
+      <td id="status2" class="launch_status_cell">Launched</td>
       <td>
-          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" disabled>
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal2" >
   View
 </button>
           @*<a href="#" class="btn btn-secondary btn-lg active" role="button" aria-pressed="true">View</a>*@
@@ -67,10 +72,10 @@
     <tr>
       <th scope="row">3</th>
       <td>Hawk-Heavy</td>
-      <td>Upcoming</td>
+      <td id="status3" class="launch_status_cell">Upcoming</td>
       <td>
           @*<button type="button" class="btn btn-lg btn-primary" disabled>View</button>*@
-          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" disabled>
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal3">
   View
 </button>
           </td>
@@ -85,12 +90,12 @@
   Launch demo modal
 </button>*@
 
-<!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<!-- Modal1 -->
+<div class="modal fade" id="modal1" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Telemetry Viewer</h5>
+        <h5 class="modal-title" id="exampleModalLabel1">Telemetry Viewer</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -104,27 +109,27 @@
               <tbody>
                 <tr>
                   <th scope="row">Altitude</th>
-                  <td id="altitude"></td>
+                  <td id="altitude1"></td>
                 </tr>
                 <tr>
                   <th scope="row">Longitude</th>
-                  <td id="longitude"></td>
+                  <td id="longitude1"></td>
                 </tr>
                 <tr>
                   <th scope="row">Latitude</th>
-                  <td colspan="2" id="latitude"></td>
+                  <td colspan="2" id="latitude1"></td>
                 </tr>
                 <tr>
                   <th scope="row">Temperature</th>
-                  <td colspan="2" id="temperature"></td>
+                  <td colspan="2" id="temperature1"></td>
                 </tr>
                 <tr>
                   <th scope="row">Time to Orbit</th>
-                  <td colspan="2" id="time_to_orbit"></td>
+                  <td colspan="2" id="time_to_orbit1"></td>
                 </tr>
                 <tr>
                   <th scope="row">Time Formatted</th>
-                  <td colspan="2" id="time_formatted"></td>
+                  <td colspan="2" id="time_formatted1"></td>
                 </tr>
               </tbody>
             </table>
@@ -137,8 +142,123 @@
   </div>
 </div>
 
+<!-- Modal2 -->
+<div class="modal fade" id="modal2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel2">Telemetry Viewer</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+            <!----------Telemetry Table-------------------------------------------------------------------------------->
+            <table class="table table-striped table-hover">
+@*              <thead>
+                <tr>
+                  <th scope="col" colspan="2" style="text-align:center">Telemetry Data</th>
+                </tr>
+              </thead>*@
+              <tbody>
+                <tr>
+                  <th scope="row">Altitude</th>
+                  <td id="altitude2"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Longitude</th>
+                  <td id="longitude2"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Latitude</th>
+                  <td colspan="2" id="latitude2"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Temperature</th>
+                  <td colspan="2" id="temperature2"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Time to Orbit</th>
+                  <td colspan="2" id="time_to_orbit2"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Time Formatted</th>
+                  <td colspan="2" id="time_formatted2"></td>
+                </tr>
+              </tbody>
+            </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+        @*<button type="button" class="btn btn-primary">Save changes</button>*@
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal3 -->
+<div class="modal fade" id="modal3" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel3">Telemetry Viewer</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+            <!----------Telemetry Table-------------------------------------------------------------------------------->
+            <table class="table table-striped table-hover">
+@*              <thead>
+                <tr>
+                  <th scope="col" colspan="2" style="text-align:center">Telemetry Data</th>
+                </tr>
+              </thead>*@
+              <tbody>
+                <tr>
+                  <th scope="row">Altitude</th>
+                  <td id="altitude3"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Longitude</th>
+                  <td id="longitude3"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Latitude</th>
+                  <td colspan="2" id="latitude3"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Temperature</th>
+                  <td colspan="2" id="temperature3"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Time to Orbit</th>
+                  <td colspan="2" id="time_to_orbit3"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Time Formatted</th>
+                  <td colspan="2" id="time_formatted3"></td>
+                </tr>
+              </tbody>
+            </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+        @*<button type="button" class="btn btn-primary">Save changes</button>*@
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
 @section scripts {
 <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
 <script src="~/js/messagebroker.js"></script>
+<script>
+    localStorage.stat1 = document.getElementById("status1").innerText;
+    //console.log("localStroage.stat1: " + localStorage.stat1);
+    localStorage.stat2 = document.getElementById("status2").innerText;
+    //console.log("localStroage.stat2: " + localStorage.stat2);
+    localStorage.stat3 = document.getElementById("status3").innerText;
+    //console.log("localStroage.stat3: " + localStorage.stat3);
+</script>
 @*<script src="https://code.jquery.com/jquery-3.5.0.js"></script>*@
 }

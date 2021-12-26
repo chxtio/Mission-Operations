@@ -11,24 +11,24 @@
   <div class="col-auto">
     <label  for="autoSizingSelect">Choose Target</label>
     <select class="form-select" id="targetSelect">
-      <option selected>Select</option>
+      <option selected disabled>Select</option>
       <option value="1">Bird-9</option>
-      <option value="2">Bird-Heavy</option>
-      <option value="3">Hawk-Heavy</option>
+      <option value="2" >Bird-Heavy</option>
+      <option value="3" >Hawk-Heavy</option>
     </select>
   </div>
   <div class="col-auto">
     <label for="autoSizingSelect">Choose Command</label>
     <select class="form-select" id="commandSelect">
-      <option selected>Select</option>
-      <option value="1">DeployPayload</option>
-      <option value="2">Deorbit</option>
-      <option value="3">StartTelemetry</option>
-      <option value="3">StopTelemetry</option>
+      <option selected disabled>Select</option>
+      <option value="1" id="deployBtn" disabled>DeployPayload</option>
+      <option value="2" id="deorbitBtn" disabled>Deorbit</option>
+      <option value="3" id="startTlmBtn" disabled>StartTelemetry</option>
+      <option value="3" id="stopTlmBtn" disabled>StopTelemetry</option>
     </select>
   </div>
   <div class="col-auto">
-    <button type="submit" class="btn btn-primary">Send</button>
+    <button type="submit" class="btn btn-primary" id="cmd_btn" disabled>Send</button>
   </div>
 </form>
 </div>

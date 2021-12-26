@@ -18,9 +18,15 @@ namespace LaunchVehicle
             var messageBrokerType = MessageBrokerType.RabbitMq;
             // Create subscriber based on message broker type
             var subscriber = MessageBrokerSubscriberFactory.Create(messageBrokerType);
+
+            Dictionary<string, int> lvDict = new Dictionary<string, int>(3);
+            lvDict.Add("Bird-9", 1);
+            lvDict.Add("Bird-Heavy", 2);
+            lvDict.Add("Hawk-Heavy", 3);
             var publishMessages = false;
             var deployable = false;
             var target = "";
+            var lvId = 1;
 
             //subscriber.Subscribe(async (subs, messageReceivedEventArgs) =>
             //{
@@ -37,8 +43,14 @@ namespace LaunchVehicle
                 var body = messageReceivedEventArgs.ReceivedMessage.Body;
                 var commandMessage = SubscriberServiceBus.Deserialize<cmdMessage>(body);
                 target = commandMessage.Target;
-                var cmd = commandMessage.Cmd;
+                var cmd = commandMessage.Cmd;                
                 Console.WriteLine("Received command: (Target: " + target + ") " + cmd);
+
+                if (lvDict.ContainsKey(target))
+                {
+                    lvId = lvDict[target];
+                }
+
                 switch (cmd)
                 {
                     case "StartTelemetry":
@@ -77,7 +89,7 @@ namespace LaunchVehicle
             //Console.ReadLine();
 
             // Generate telemetry data
-            //var messageId = Guid.NewGuid().ToString("N");
+            
             var altitude = 400.0;
             var longitude = -45.34;
             var latitude = -25.34;
@@ -85,34 +97,26 @@ namespace LaunchVehicle
             var timeToOrbit = 15.0;
 
             // Uncomment for debugging
-            //publishMessages = true;
+            publishMessages = true;
 
             do
             {
                 while (publishMessages)
                 {
                     // Seed simulated telemetry 
-                    string json = JsonSerializer.Serialize(new { timestamp = DateTime.UtcNow.ToString(), altitude = altitude, longitude = longitude, latitude = latitude, temperature = temperature, timeToOrbit = timeToOrbit });
+
                     var messageId = Guid.NewGuid().ToString("N");
+                    var teleMessage = new TeleMessage(messageId, lvId, altitude, longitude, latitude, temperature, timeToOrbit, DateTime.UtcNow);
+                    var json = JsonSerializer.Serialize(teleMessage);
                     var eventMessage = new EventMessage(messageId, json, "test", DateTime.UtcNow);
                     var eventMessageJson = JsonSerializer.Serialize(eventMessage); // Serialize message to Json
                     var messageBytes = Encoding.UTF8.GetBytes(eventMessageJson);
+                    Console.WriteLine(messageBytes);
                     var message = new Message(messageBytes, messageId, "application/json"); // Adapter design pattern
                     await messageBrokerPublisher.Publish(message);
-                    //Console.WriteLine($"{messageId}: {json}\n");
+                    Console.WriteLine($"{messageId}: {eventMessageJson}\n");
+
                     await Task.Delay(1000);
-
-
-                    ////var teleMessage = new TeleMessage(messageId, altitude, longitude, latitude, temperature, timeToOrbit, DateTime.UtcNow);
-                    //var eventMessageJson = JsonSerializer.Serialize(teleMessage); // Serialize message to Json
-                    //var messageBytes = Encoding.UTF8.GetBytes(eventMessageJson);
-                    //Console.WriteLine(messageBytes);
-                    //var message = new Message(messageBytes, messageId, "application/json"); // Adapter design pattern
-                    //await messageBrokerPublisher.Publish(message);
-                    ////await messageBrokerPublisher.Publish(eventMessageJson);
-                    //Console.WriteLine($"{messageId}: {eventMessageJson}\n");
-
-                    //await Task.Delay(1000);
 
                     // Update with random values
                     messageId = Guid.NewGuid().ToString("N");
@@ -128,7 +132,6 @@ namespace LaunchVehicle
                         deployable = true;
                         Console.WriteLine("Ready to deploy payload for launch vehicle: " + target);
                     } 
-                    
 
                     if (!publishMessages)
                     {

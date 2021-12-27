@@ -1,7 +1,5 @@
 ﻿"use strict"
 
-var lvDict = { "Bird-9": 1, "Bird-Heavy": 2, "Hawk-Heavy": 3 }
-
 // Generate client-side SignalR Hub proxy
 const signalrConnection = new signalR.HubConnectionBuilder()
     .withUrl("/messagebroker")
@@ -15,7 +13,10 @@ signalrConnection.start().then(function () {
     return console.error(err.toString());
 });
 
-let messageCount = 0;
+var messageCount = 0;
+var lvDict = { "Bird-9": 1, "Bird-Heavy": 2, "Hawk-Heavy": 3 }
+var lVehicles = { 1: { name: "Bird-9", launchStatus: "Launched", deployStatus: "Ready to Deploy" }, 2: { name: "Bird-Heavy", launchStatus: "Launched", deployStatus: "In Progress" }, 3: { name: "Hawk-Heavy", launchStatus: "Upcoming", deployStatus: "N/A" },}
+$('#alertBtn').hide();
 
 // Subscribe to onMessageReceived (client-side hub method) to show incoming messages from backend
 signalrConnection.on("onMessageReceived", function (eventMessage) {
@@ -31,7 +32,7 @@ signalrConnection.on("onMessageReceived", function (eventMessage) {
 
     for (const property in eventMessage) {
 
-        console.log("property: " + property + " value: " + eventMessage[property]);
+        //console.log("property: " + property + " value: " + eventMessage[property]);
 
         if (property === "title") {
             console.log(eventMessage["title"]);
@@ -52,15 +53,12 @@ signalrConnection.on("onMessageReceived", function (eventMessage) {
             document.getElementById("tto" + lvId).innerText = timeToOrbit;
             document.getElementById("time_formatted" + lvId).innerText = createdDateTime;
 
-            var lvId = lvDict[localStorage.target];
+            //var lvId = lvDict[localStorage.target];
             console.log("lvId: " + lvId);
             console.log("tto: " + timeToOrbit);
 
             if (timeToOrbit === 0) {
-                console.log("Change payload status to ready to deploy");
-                var deployStatus = document.getElementById("deploy" + lvId);
-                deployStatus.innerHTML = "Ready to Deploy";
-                deployStatus.className = "deploy-status open";
+                reachedOrbit(lvId)
             }
 
             //console.log("timestamp: " + createdDateTime + "altitude: " + altitude + " \nlongitude: " + longitude + "\nlatitude: " + latitude + "\ntemperature: " + temperature + "\ntimeToOrbit: " + timeToOrbit);
@@ -104,31 +102,34 @@ $(document).ready(function () {
         const cmd = $('#commandSelect').find(":selected").text();
         //console.log("Target: " + target + " Command: " + cmd);
 
-        //var status1 = localStorage.stat1;
-        //var status2 = localStorage.stat2;
-        //var status3 = localStorage.stat3;
-        //console.log("status1: " + status1 + "\nstatus2: " + status2 + "\nstatus3: " + status3);
-        var statusDict = { 1: localStorage.stat1, 2: localStorage.stat2, 3: localStorage.stat3 };
+        console.log(lVehicles);
         var lvId = lvDict[target];
-        var status = statusDict[lvId];
-        console.log("status" + lvId + ": " + status);
+        var launchStatus = lVehicles[lvId]["launchStatus"]
+        var deployStatus = lVehicles[lvId]["deployStatus"];        
+        console.log("launchStatus: " + launchStatus);
+        console.log(target + "payload deployStatus: " + deployStatus);
 
-        if (status === "Launched") {
+        if (launchStatus === "Launched") {
             $('#deorbitBtn').prop('disabled', false);
             $('#startTlmBtn').prop('disabled', false);
             $('#stopTlmBtn').prop('disabled', false);
-        } else if (status === "Upcoming") {
+            if (deployStatus === "Ready to Deploy") {
+                console.log("Unlock deploy btn");
+                $('#deployBtn').prop('disabled', false);
+            } else {
+                $('#deployBtn').prop('disabled', true);
+            }
+        } else if (launchStatus === "Upcoming") {
             $('#deorbitBtn').prop('disabled', true);
             $('#startTlmBtn').prop('disabled', true);
             $('#stopTlmBtn').prop('disabled', true);
+            $('#deployBtn').prop('disabled', true);
         }
 
         if (cmd === "Select") {
             $('#cmd_btn').prop('disabled', true);
         } else
             $('#cmd_btn').prop('disabled', false);
-
-        localStorage.target = target;
     })
 
     $('#commandSelect').change(function () {
@@ -142,20 +143,50 @@ $(document).ready(function () {
             $('#cmd_btn').prop('disabled', false);
     })
 
+    // Sends command and target info
     $('#cmd_form').submit(function (e) {
         e.preventDefault();
         const target = $('#targetSelect').find(":selected").text();
         const cmd = $('#commandSelect').find(":selected").text();
           var text = $('#cmdHistory')
-        text.val(text.val() + cmd + "\n");
+        text.val(text.val() + target + " | " + cmd + "\n");
         console.log("Target: " + target + " Command: " + cmd);
 
         signalrConnection.invoke("cmdReceived", target, cmd).catch(function (err) {
             return console.error(err.toString());
         });
 
+        if (cmd === "DeployPayload") {
+            deploy(lvDict[target]);
+        }
+
+        $('#targetSelect').val('0');
+        $('#commandSelect').val('0');
+
     })
 
 });
 
+function reachedOrbit(lvId) {
+    // Change payload status to ready to deploy
+    var deployStatus = document.getElementById("deploy" + lvId);
+    if (deployStatus.innerHTML === "Ready to Deploy") {
+        return;
+    }
+    deployStatus.innerHTML = "Ready to Deploy";
+    deployStatus.className = "deploy-status open";
+    lVehicles[lvId]["deployStatus"] = "Ready to Deploy";
 
+    console.log("alert");
+    $('#alertBtn').show();
+    //$('#alertModal').modal('show');    
+    document.getElementById("alert-body").innerHTML = "Payload is ready to deploy";
+}
+
+function deploy(lvId) {
+    // Change payload status to deployed
+    var deployStatus = document.getElementById("deploy" + lvId);
+    deployStatus.innerHTML = "Deployed";
+    deployStatus.className = "deploy-status open";
+    lVehicles[lvId]["deployStatus"] = "Deployed";
+}

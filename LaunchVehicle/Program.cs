@@ -28,16 +28,6 @@ namespace LaunchVehicle
             var target = "";
             var lvId = 2;
 
-            //subscriber.Subscribe(async (subs, messageReceivedEventArgs) =>
-            //{
-            //    var body = messageReceivedEventArgs.ReceivedMessage.Body;
-            //    var commandMessage = SubscriberServiceBus.Deserialize<CommandMessage>(body);
-            //    //Console.WriteLine("Received cmd: " + commandMessage.Cmd);
-            //    publishMessages = commandMessage.State;
-            //    Console.WriteLine("Received command: " + commandMessage.State);
-            //    await subs.Acknowledge(messageReceivedEventArgs.AcknowledgeToken);
-            //});
-
             subscriber.Subscribe(async (subs, messageReceivedEventArgs) =>
             {
                 var body = messageReceivedEventArgs.ReceivedMessage.Body;
@@ -70,10 +60,10 @@ namespace LaunchVehicle
                         if (deployable)
                         {
                             Console.WriteLine("Releasing Payload...");
-                            var p = new Process();
-                            //p.StartInfo.FileName = @"..\..\..\..\..\..\text.txt";
-                            p.StartInfo.FileName = @"C:\Program Files\Notepad++\notepad++.exe"; //"D:\OneDrive\Projects\csharp\Deep-Space-Network\LaunchVehicle\bin\Debug\net6.0\LaunchVehicle.exe";
-                            p.Start();
+                            //var p = new Process();
+                            ////p.StartInfo.FileName = @"..\..\..\..\..\..\text.txt";
+                            //p.StartInfo.FileName = @"C:\Program Files\Notepad++\notepad++.exe"; //"D:\OneDrive\Projects\csharp\Deep-Space-Network\LaunchVehicle\bin\Debug\net6.0\LaunchVehicle.exe";
+                            //p.Start();
                         } else
                         {
                             Console.WriteLine("Unable to deploy payload until launch vehicle is in orbit.");
@@ -98,10 +88,10 @@ namespace LaunchVehicle
             var longitude = -45.34;
             var latitude = -25.34;
             var temperature = 340.0;
-            var timeToOrbit = 15.0;
+            var timeToOrbit = 5.0;
 
             // Uncomment for debugging
-            publishMessages = true;
+            //publishMessages = true;
 
             do
             {
@@ -144,42 +134,6 @@ namespace LaunchVehicle
                 }
             }
             while (true);
-
-
-
-            //    do
-            //    {
-            //        while (publishMessages)
-            //        {
-            //            //Console.WriteLine("Publishing messages");
-            //            // Publish titles to publisher
-            //            //foreach (var title in GetTitles(@"..\..\..\RandomTitles.txt"))
-            //            foreach (var title in GetTitles(@"..\..\..\TelemetryData.txt"))
-            //            {
-            //                //string json = JsonConvert.SerializeObject(new { PropertyA = "JSONtest" });
-            //                string json = JsonSerializer.Serialize(new { PropertyA = "JSONtest", longitude = "longTest" });
-
-            //                var messageId = Guid.NewGuid().ToString("N");
-            //                var eventMessage = new EventMessage(messageId, json, "test", DateTime.UtcNow);
-            //                var eventMessageJson = JsonSerializer.Serialize(eventMessage); // Serialize message to Json
-            //                var messageBytes = Encoding.UTF8.GetBytes(eventMessageJson);
-            //                var message = new Message(messageBytes, messageId, "application/json"); // Adapter design pattern
-
-
-            //                //string jsonTest = JsonConvert.SerializeObject(eventMessage);
-            //                //var messageBytes = Encoding.UTF8.GetBytes(jsonTest);
-            //                //var message = new Message(messageBytes, messageId, "application/json");
-
-            //                await messageBrokerPublisher.Publish(message);
-            //                await Task.Delay(1000);
-            //                if (!publishMessages)
-            //                {
-            //                    break;
-            //                }
-            //            }
-            //        }
-            //    }
-            //    while (true);
 
 
         }

@@ -23,8 +23,6 @@ namespace SignalRApp
         private PublisherCommandMessageBase _publisherCommandMessage;
         private PublisherCommandMessageBase PublisherCommandMessage { get { return _publisherCommandMessage ??= MakePublisherCommandMessage(MessageBrokerSettings, CommandTopicName); } }
 
-        //private PublisherCmdMessageBase _publisherCmdMessage;
-        //private PublisherCmdMessageBase PublisherCmdMessage { get { return _publisherCmdMessage ??= MakePublisherCommandMessage(MessageBrokerSettings, CommandTopicName); } }
 
         public SignalProcessorManager()
         {

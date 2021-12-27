@@ -2,19 +2,12 @@
 for details on configuring this project to bundle and minify static web assets. */
 
 body {
-    /*background: linear-gradient(to right, #141e30, #243b55);*/
-    /*background: rgb(2,0,36);*/
     background-image: linear-gradient(45deg, rgba(2,0,36,0.7), rgba(2,21,58,0.7), rgba(0,212,255,0.7)), url(https://images.immediate.co.uk/production/volatile/sites/4/2018/07/GettyImages-522064886use-db5a475.jpg?quality=90&resize=768,574);
-    /*background-image: linear-gradient(to right, #141e30, #243b55), url(https://media.istockphoto.com/photos/half-moon-surface-and-starry-space-picture-id470456843?b=1&k=20&m=470456843&s=170667a&w=0&h=2WudlvbPmywrax5FSW5OqAdtJKY8gYx617ovrcTdQiM=);*/
     background-position: center;
     background-repeat: repeat;
     background-size: cover;
 }
 
-/*.outcome {
-    padding: 2px 4px;
-    white-space: nowrap;
-}*/
 
 .success {
     background-color: rgba(0, 0, 0, 0.3);
@@ -144,10 +137,20 @@ body {
     width: 100%
 }
 
-/*#launch_table th {
-    padding: 15px;
+.top-buttons {
+    margin-top: 40px;
+    margin-bottom: 20px;
 }
 
-#launch_table td {
-    padding: 15px;
+/*.modal-header {
+    background-color: midnightblue;
+    color: white;
 }*/
+
+/*.modal-body {
+    background-image: linear-gradient(45deg, rgba(2,0,36,0.7), rgba(2,21,58,0.7), rgba(0,212,255,0.7)), url(https://images.immediate.co.uk/production/volatile/sites/4/2018/07/GettyImages-522064886use-db5a475.jpg?quality=90&resize=768,574);
+    background-position: center;
+    background-repeat: repeat;
+    background-size: cover;
+}*/
+

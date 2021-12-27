@@ -6,10 +6,99 @@
 
 
 
-
 <div class="text-center">
     <h1 class="display-4">Deep Space Network</h1>
 </div>
+
+@*<div class="d-grid gap-2 d-md-block">
+  <button class="btn btn-primary" type="button">Button</button>
+</div>*@
+
+<div class="top-buttons">
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Commands</button>
+    <button type="button" class="btn btn-secondary">Secondary</button>
+    <button type="button" class="btn btn-success">Success</button>
+    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#alertModal" id="alertBtn">Alerts</button>
+    <button type="button" class="btn btn-warning">Warning</button>
+    <button type="button" class="btn btn-info">Info</button>
+    <button type="button" class="btn btn-light">Light</button>
+    <button type="button" class="btn btn-dark">Dark</button>
+</div>
+
+<!-----------top buttons- modals---------------------------------------->
+@*<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+  Launch demo modal
+</button>*@
+
+<!-- Alerts Modal -->
+<div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Alert</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div id="alert-body" class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Commands Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div>
+            <form class="row gy-2 gx-3 align-items-center" id="cmd_form"> @*action="/action_page.php"*@ 
+                <div class="col-auto">
+                <label  for="autoSizingSelect">Choose Target</label>
+                <select class="form-select" id="targetSelect">
+                    <option selected disabled>Select</option>
+                    <option value="1">Bird-9</option>
+                    <option value="2" >Bird-Heavy</option>
+                    <option value="3" >Hawk-Heavy</option>
+                </select>
+                </div>
+                <div class="col-auto">
+                <label for="autoSizingSelect">Choose Command</label>
+                <select class="form-select" id="commandSelect">
+                    <option selected disabled>Select</option>
+                    <option value="1" id="deployBtn" disabled>DeployPayload</option>
+                    <option value="2" id="deorbitBtn" disabled>Deorbit</option>
+                    <option value="3" id="startTlmBtn" disabled>StartTelemetry</option>
+                    <option value="3" id="stopTlmBtn" disabled>StopTelemetry</option>
+                </select>
+                </div>
+                <div class="col-auto">
+                <button type="submit" class="btn btn-primary" id="cmd_btn" disabled>Send</button>
+                </div>
+            </form>
+        </div>
+
+        <br />
+        <div >
+            <label for="Textarea1" class="form-label">Command History</label>
+            <textarea class="form-control" id="cmdHistory" style="max-width:60%;height:100%;width:60%;" rows="4" readonly></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @*<div>
     <label class="checkbox-inline">
         <input type="checkbox" id="chkRed" name="chkColor" data-lightColor="Red" data-toggle="toggle" data-onstyle="danger" data-offstyle="danger">
@@ -24,12 +113,10 @@
         <span style="padding-right: 40px;">Blue</span>
     </label>
 </div>*@
-<h4 id="messageCount">0</h4>
+
+@*<h4 id="messageCount">0</h4>
 <ul id="messages" style="overflow: auto; max-height: 600px;">
-</ul>
-
-
-
+</ul>*@
 
 <!----------Launch Table-------------------------------------------------------------------------------->
 <table id="launch_table" > <!---class="table table-hover table-dark"-->
@@ -61,8 +148,8 @@
           </button>
       </td>
       <td id="tto1">N/A</td>
-      <td id="deploy1" class="deploy-status open">
-          Ready to Deploy
+      <td id="deploy1" class="deploy-status in-progress">
+          In Progress
       </td>
       <td>
          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal1p">View</button>
@@ -121,6 +208,9 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
+            <h5 id="messageCount">0</h5>
+            <ul id="messages" style="overflow: auto; max-height: 600px;">
+            </ul>
             <!----------Telemetry Table-------------------------------------------------------------------------------->
             <table class="table table-striped table-hover">
 @*              <thead>
@@ -272,15 +362,38 @@
 
 
 @section scripts {
+<!--Reference the SignalR library. -->
 <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
+<!--Reference the messagebroker script. -->
 <script src="~/js/messagebroker.js"></script>
 <script>
-    localStorage.stat1 = document.getElementById("status1").innerText;
-    //console.log("localStroage.stat1: " + localStorage.stat1);
-    localStorage.stat2 = document.getElementById("status2").innerText;
-    //console.log("localStroage.stat2: " + localStorage.stat2);
-    localStorage.stat3 = document.getElementById("status3").innerText;
-    //console.log("localStroage.stat3: " + localStorage.stat3);
+    //localStorage.stat1 = document.getElementById("status1").innerText;
+    ////console.log("localStroage.stat1: " + localStorage.stat1);
+    //localStorage.stat2 = document.getElementById("status2").innerText;
+    ////console.log("localStroage.stat2: " + localStorage.stat2);
+    //localStorage.stat3 = document.getElementById("status3").innerText;
+    ////console.log("localStroage.stat3: " + localStorage.stat3);
+
+    var status1 = document.getElementById("status1").innerText;
+    var status2 = document.getElementById("status2").innerText;
+    var status3 = document.getElementById("status3").innerText;
+    var deploy1 = document.getElementById("deploy1").innerText;
+    var deploy2 = document.getElementById("deploy2").innerText;
+    var deploy3 = document.getElementById("deploy3").innerText;
+
+    var vehicles = {"items":[{name:"Bird-9", id: 1, launchStatus: status1, deployStatus: deploy1}, {name:"Bird-Heavy", id: 2, launchStatus: status2, deployStatus: deploy2},{name:"Hawk-Heavy",id: 3, launchStatus: status3, deployStatus: deploy3}]};
+    
+    //localStorage.clear();
+    if (!localStorage.getItem('vehicles')) {
+        localStorage.setItem('vehicles', JSON.stringify(vehicles));
+    }    
+    
+    var lvItems = JSON.parse(localStorage.getItem('vehicles'));
+    var launchStatus = lvItems["items"][1]["launchStatus"];
+    var deployStatus = lvItems["items"][1]["deployStatus"];
+    console.log("launchStatus: " + launchStatus);
+    console.log("onIndex: Bird-Heavy deployStatus: " + deployStatus);
+
 </script>
 @*<script src="https://code.jquery.com/jquery-3.5.0.js"></script>*@
 }

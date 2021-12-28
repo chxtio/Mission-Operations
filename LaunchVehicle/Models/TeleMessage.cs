@@ -4,6 +4,7 @@ namespace LaunchVehicle
 {
     public sealed class TeleMessage
     {
+        public string Type { get; }
         public string Id { get; }
         public int LvId { get; }
         public double Altitude { get; }
@@ -13,8 +14,9 @@ namespace LaunchVehicle
         public double TimeToOrbit { get; }
         public DateTime CreatedDateTime { get; }
 
-        public TeleMessage(string id, int lvId, double altitude, double longitude, double latitude, double temperature, double timeToOrbit, DateTime createdDateTime)
+        public TeleMessage(string type, string id, int lvId, double altitude, double longitude, double latitude, double temperature, double timeToOrbit, DateTime createdDateTime)
         {
+            Type = type;
             Id = id;
             LvId = lvId;
             Altitude = altitude;

@@ -23,10 +23,11 @@ namespace SignalRApp
                 createdDateTime: DateTime.UtcNow));
         }
 
-        public async Task cmdReceived(string target, string command)
+        public async Task cmdReceived(string type, string target, string command)
         {
             await _signalProcessorManager.PublishCmdMessage(new cmdMessage(
                 id: Guid.NewGuid().ToString("N"),
+                type: type,
                 cmd: command,
                 target: target,
                 createdDateTime: DateTime.UtcNow));

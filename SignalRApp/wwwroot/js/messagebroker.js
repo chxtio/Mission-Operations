@@ -15,20 +15,18 @@ signalrConnection.start().then(function () {
 
 var messageCount = 0;
 var lvDict = { "Bird-9": 1, "Bird-Heavy": 2, "Hawk-Heavy": 3 }
+var pDict = { "GPM": 1, "TDRS-11": 2, "RO-245": 3 }
 var lVehicles = { 1: { name: "Bird-9", launchStatus: "Launched", deployStatus: "Ready to Deploy" }, 2: { name: "Bird-Heavy", launchStatus: "Launched", deployStatus: "In Progress" }, 3: { name: "Hawk-Heavy", launchStatus: "Upcoming", deployStatus: "N/A" },}
 $('#alertBtn').hide();
+$('#payloadBtn').hide();
 
 // Subscribe to onMessageReceived (client-side hub method) to show incoming messages from backend
 signalrConnection.on("onMessageReceived", function (eventMessage) {
     messageCount++;
     const msgCountH4 = document.getElementById("messageCount");
     msgCountH4.innerText = "Telemetry Packets: " + messageCount.toString();
-    //const ul = document.getElementById("messages");
-    //const li = document.createElement("li");
-    //li.innerText = "#" + messageCount.toString();
 
     console.log("Messages: " + messageCount.toString());
-    //console.log(JSON.stringify(eventMessage));
 
     for (const property in eventMessage) {
 
@@ -37,7 +35,13 @@ signalrConnection.on("onMessageReceived", function (eventMessage) {
         if (property === "title") {
             console.log(eventMessage["title"]);
             var json = JSON.parse(eventMessage["title"]);
-            var lvId = json["LvId"];
+            var type = json["Type"];
+            console.log("type: " + type);
+            var p = "";
+            if (type == "payload_command") {
+                p = "p";
+            }
+            var id = json["LvId"];
             var altitude = json["Altitude"];
             var longitude = json["Longitude"];
             var latitude = json["Latitude"];
@@ -45,64 +49,70 @@ signalrConnection.on("onMessageReceived", function (eventMessage) {
             var timeToOrbit = json["TimeToOrbit"];
             var createdDateTime = json["CreatedDateTime"];
 
-            document.getElementById("altitude" + lvId).innerText = altitude;
-            document.getElementById("longitude" + lvId).innerText = longitude;
-            document.getElementById("latitude" + lvId).innerText = latitude;
-            document.getElementById("temperature" + lvId).innerText = temperature;
-            document.getElementById("time_to_orbit" + lvId).innerText = timeToOrbit;
-            document.getElementById("tto" + lvId).innerText = timeToOrbit;
-            document.getElementById("time_formatted" + lvId).innerText = createdDateTime;
+            document.getElementById("altitude" + p + id).innerText = altitude;
+            document.getElementById("longitude" + p + id).innerText = longitude;
+            document.getElementById("latitude" + p + id).innerText = latitude;
+            document.getElementById("temperature" + p + id).innerText = temperature;
+            document.getElementById("time_to_orbit" + p + id).innerText = timeToOrbit;
+            document.getElementById("tto" + p + id).innerText = timeToOrbit;
+            document.getElementById("time_formatted" + p + id).innerText = createdDateTime;
 
-            //var lvId = lvDict[localStorage.target];
-            console.log("lvId: " + lvId);
+            console.log("id: " + id);
             console.log("tto: " + timeToOrbit);
 
             if (timeToOrbit === 0) {
-                reachedOrbit(lvId)
+                reachedOrbit(id)
             }
-
-            //console.log("timestamp: " + createdDateTime + "altitude: " + altitude + " \nlongitude: " + longitude + "\nlatitude: " + latitude + "\ntemperature: " + temperature + "\ntimeToOrbit: " + timeToOrbit);
-
-            //for (const key in json) {
-            //    const newDiv = document.createElement("div");
-            //    const classAttrib = document.createAttribute("style");
-            //    classAttrib.value = "font-size: 80%;";
-            //    newDiv.setAttributeNode(classAttrib);
-            //    const newContent = document.createTextNode(`${key}: ${json[key]}`);
-            //    newDiv.appendChild(newContent);
-            //    li.appendChild(newDiv);
-            //}
         }    
 
     }
 
-    //ul.prepend(li);
 });
-
 
 
 // Catch commands on client side
 $(document).ready(function () {
+    // -------------------Launch Form ---------------------------------------------------
+    $('#launch_target_select').change(function () {
+        const target = $(this).find(":selected").text();
+        console.log("launch form | Target: " + target);
 
-    $('[name="chkColor"]').change(function () {
-        const state = $(this).prop('checked');
-        const lightColor = $(this).attr('data-lightColor');
+        var lvId = lvDict[target];
 
-        console.log("state: " + state);
-        console.log("lightColor: " + lightColor);
+        var launchStatus = lVehicles[lvId]["launchStatus"];
+        console.log("launch status: " + launchStatus);
 
-        //signalrConnection.invoke("CommandReceived", lightColor, state).catch(function (err) {
-        //    return console.error(err.toString());
-        //});
-        event.preventDefault();
+        if (launchStatus === "Launched") {
+            //var test = $('#launch_target' + lvId).find(".selected").text();
+            console.log("launch form | disable " + target);
+            
+            $('#launch_target' + lvId).prop('disabled', true);
+        } else {
+            $('#launch_target' + lvId).prop('disabled', false);
+            $('#launch_cmd_btn').prop('disabled', false);
+        }
+
     })
 
+    // Sends launch command info
+    $('#launch_cmd_form').submit(function (e) {
+        e.preventDefault();
+        const target = $('#launch_target_select').find(":selected").text();
+
+        signalrConnection.invoke("cmdReceived", "launch_command", target, "Launch").catch(function (err) {
+            return console.error(err.toString());
+        });
+
+        $('#launch_target_select').val('0');
+    })
+
+    // -------------------Command Center -------------------------------------------------
     $('#targetSelect').change(function () {
         const target = $(this).find(":selected").text();
         const cmd = $('#commandSelect').find(":selected").text();
         //console.log("Target: " + target + " Command: " + cmd);
 
-        console.log(lVehicles);
+        //console.log(lVehicles);
         var lvId = lvDict[target];
         var launchStatus = lVehicles[lvId]["launchStatus"]
         var deployStatus = lVehicles[lvId]["deployStatus"];        
@@ -152,7 +162,7 @@ $(document).ready(function () {
         text.val(text.val() + target + " | " + cmd + "\n");
         console.log("Target: " + target + " Command: " + cmd);
 
-        signalrConnection.invoke("cmdReceived", target, cmd).catch(function (err) {
+        signalrConnection.invoke("cmdReceived", "command", target, cmd).catch(function (err) {
             return console.error(err.toString());
         });
 
@@ -162,7 +172,35 @@ $(document).ready(function () {
 
         $('#targetSelect').val('0');
         $('#commandSelect').val('0');
+    })
 
+    // -------------------Payload Command Center -------------------------------------------------
+    $('#payload_command_select').change(function () {
+        const cmd = $(this).find(":selected").text();
+        const target = $('#payload_target_select').find(":selected").text();
+        //console.log("Target: " + target + " Command: " + cmd);
+
+        if (target === "Select") {
+            $('#payload_cmd_btn').prop('disabled', true);
+        } else
+            $('#payload_cmd_btn').prop('disabled', false);
+    })
+
+    // Sends payload command info
+    $('#payload_cmd_form').submit(function (e) {
+        e.preventDefault();
+        const target = $('#payload_target_select').find(":selected").text();
+        const cmd = $('#payload_command_select').find(":selected").text();
+        var text = $('#payload_cmd_history')
+        text.val(text.val() + target + " | " + cmd + "\n");
+        console.log("Target: " + target + " Command: " + cmd);
+
+        signalrConnection.invoke("cmdReceived", "payload_command", target, cmd).catch(function (err) {
+            return console.error(err.toString());
+        });
+
+        $('#payload_target_select').val('0');
+        $('#payload_command_select').val('0');
     })
 
 });
@@ -170,7 +208,7 @@ $(document).ready(function () {
 function reachedOrbit(lvId) {
     // Change payload status to ready to deploy
     var deployStatus = document.getElementById("deploy" + lvId);
-    if (deployStatus.innerHTML === "Ready to Deploy") {
+    if (deployStatus.innerHTML === "Ready to Deploy" || deployStatus.innerHTML === "Deployed") {
         return;
     }
     deployStatus.innerHTML = "Ready to Deploy";
@@ -189,4 +227,6 @@ function deploy(lvId) {
     deployStatus.innerHTML = "Deployed";
     deployStatus.className = "deploy-status open";
     lVehicles[lvId]["deployStatus"] = "Deployed";
+    $('#choosePayl' + lvId).prop('disabled', false);
+    $('#payloadBtn').show();
 }

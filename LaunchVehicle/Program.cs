@@ -14,7 +14,6 @@ namespace LaunchVehicle
     {
         static async Task Main()
         {
-            //Console.WriteLine("Hello, World!");
             var messageBrokerType = MessageBrokerType.RabbitMq;
             // Create subscriber based on message broker type
             var subscriber = MessageBrokerSubscriberFactory.Create(messageBrokerType);
@@ -26,16 +25,17 @@ namespace LaunchVehicle
             var publishMessages = false;
             var deployable = false;
             var target = "";
-            var lvId = 2;
+            var lvId = 0;
+            var type = "";
 
             subscriber.Subscribe(async (subs, messageReceivedEventArgs) =>
             {
                 var body = messageReceivedEventArgs.ReceivedMessage.Body;
                 var commandMessage = SubscriberServiceBus.Deserialize<cmdMessage>(body);
+                type = commandMessage.Type;
                 target = commandMessage.Target;
-
                 var cmd = commandMessage.Cmd;                
-                Console.WriteLine("Received command: (Target: " + target + ") " + cmd);
+                Console.WriteLine("Received command (Type: " + type + "; Target: " + target + "): " + cmd);
 
                 if (target != "")
                 {
@@ -80,10 +80,8 @@ namespace LaunchVehicle
             var messageBrokerPublisher = MessageBrokerPublisherFactory.Create(messageBrokerType);
 
             Console.WriteLine("Waiting to Start Publishing Messages");
-            //Console.ReadLine();
 
-            // Generate telemetry data
-            
+            // Generate telemetry data            
             var altitude = 400.0;
             var longitude = -45.34;
             var latitude = -25.34;
@@ -97,15 +95,14 @@ namespace LaunchVehicle
             {
                 while (publishMessages)
                 {
-                    // Seed simulated telemetry 
+                    // Simulate telemetry 
 
                     var messageId = Guid.NewGuid().ToString("N");
-                    var teleMessage = new TeleMessage(messageId, lvId, altitude, longitude, latitude, temperature, timeToOrbit, DateTime.UtcNow);
+                    var teleMessage = new TeleMessage(type, messageId, lvId, altitude, longitude, latitude, temperature, timeToOrbit, DateTime.UtcNow);
                     var json = JsonSerializer.Serialize(teleMessage);
-                    var eventMessage = new EventMessage(messageId, json, "test", DateTime.UtcNow);
+                    var eventMessage = new EventMessage(messageId, json, DateTime.UtcNow);
                     var eventMessageJson = JsonSerializer.Serialize(eventMessage); // Serialize message to Json
                     var messageBytes = Encoding.UTF8.GetBytes(eventMessageJson);
-                    Console.WriteLine(messageBytes);
                     var message = new Message(messageBytes, messageId, "application/json"); // Adapter design pattern
                     await messageBrokerPublisher.Publish(message);
                     Console.WriteLine($"{messageId}: {eventMessageJson}\n");

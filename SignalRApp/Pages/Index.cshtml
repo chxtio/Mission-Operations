@@ -4,8 +4,6 @@
     ViewData["Title"] = "Home page";
 }
 
-
-
 <div class="text-center">
     <h1 class="display-4">Deep Space Network</h1>
 </div>
@@ -15,11 +13,11 @@
 </div>*@
 
 <div class="top-buttons">
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Commands</button>
-    <button type="button" class="btn btn-secondary">Secondary</button>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#cmdModal">Commands</button>
+    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#PayloadModal" id="payloadBtn">Payload</button>
     <button type="button" class="btn btn-success">Success</button>
     <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#alertModal" id="alertBtn">Alerts</button>
-    <button type="button" class="btn btn-warning">Warning</button>
+    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#launchModal" id="launchBtn">Launch</button>
     <button type="button" class="btn btn-info">Info</button>
     <button type="button" class="btn btn-light">Light</button>
     <button type="button" class="btn btn-dark">Dark</button>
@@ -31,31 +29,12 @@
   Launch demo modal
 </button>*@
 
-<!-- Alerts Modal -->
-<div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<!------------- Commands Modal------------------------------------------------------------------------>
+<div class="modal fade" id="cmdModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Alert</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div id="alert-body" class="modal-body">
-        ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-<!-- Commands Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <h5 class="modal-title" id="exampleModalLabel">Command Center</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -77,7 +56,7 @@
                     <option value="1" id="deployBtn" disabled>DeployPayload</option>
                     <option value="2" id="deorbitBtn" disabled>Deorbit</option>
                     <option value="3" id="startTlmBtn" disabled>StartTelemetry</option>
-                    <option value="3" id="stopTlmBtn" disabled>StopTelemetry</option>
+                    <option value="4" id="stopTlmBtn" disabled>StopTelemetry</option>
                 </select>
                 </div>
                 <div class="col-auto">
@@ -99,24 +78,121 @@
   </div>
 </div>
 
-@*<div>
-    <label class="checkbox-inline">
-        <input type="checkbox" id="chkRed" name="chkColor" data-lightColor="Red" data-toggle="toggle" data-onstyle="danger" data-offstyle="danger">
-        <span style="padding-right: 40px;">Red</span>
-    </label>
-    <label class="checkbox-inline">
-        <input type="checkbox" id="chkGreen" name="chkColor" data-lightColor="Green" data-toggle="toggle" data-onstyle="success" data-offstyle="success">
-        <span style="padding-right: 40px;">Green</span>
-    </label>
-    <label class="checkbox-inline">
-        <input type="checkbox" id="chkBlue" name="chkColor" data-lightColor="Blue" data-toggle="toggle" data-onstyle="primary" data-offstyle="primary">
-        <span style="padding-right: 40px;">Blue</span>
-    </label>
-</div>*@
+<!------------- Payload Command Modal------------------------------------------------------------------------>
+<div class="modal fade" id="PayloadModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Payload Command Center</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div>
+            <form class="row gy-2 gx-3 align-items-center" id="payload_cmd_form"> @*action="/action_page.php"*@ 
+                <div class="col-auto">
+                <label  for="autoSizingSelect">Choose Target</label>
+                <select class="form-select" id="payload_target_select">
+                    <option selected disabled>Select</option>
+                    <option value="1" id="choosePayl1" disabled>GPM</option>
+                    <option value="2" id="choosePayl2" disabled>TDRS-11</option>
+                    <option value="3" id="choosePayl3" disabled>RO-245</option>
+                </select>
+                </div>
+                <div class="col-auto">
+                <label for="autoSizingSelect">Choose Command</label>
+                <select class="form-select" id="payload_command_select">
+                    <option selected disabled>Select</option>
+                    <option value="1" id="startDataBtn" >startData</option>
+                    <option value="2" id="stopDataBtn" >stopData</option>
+                    <option value="3" id="DecommisionBtn" >Decommision</option>
+                    <option value="4" id="startPayTlmBtn" >StartTelemetry</option>
+                    <option value="5" id="stopPayTlmBtn" >StopTelemetry</option>
+                </select>
+                </div>
+                <div class="col-auto">
+                <button type="submit" class="btn btn-primary" id="payload_cmd_btn" disabled>Send</button>
+                </div>
+            </form>
+        </div>
 
-@*<h4 id="messageCount">0</h4>
-<ul id="messages" style="overflow: auto; max-height: 600px;">
-</ul>*@
+        <br />
+        <div >
+            <label for="Textarea1" class="form-label">Command History</label>
+            <textarea class="form-control" id="payload_cmd_history" style="max-width:60%;height:100%;width:60%;" rows="4" readonly></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!------------- Launch Modal------------------------------------------------------------------------>
+<div class="modal fade" id="launchModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Launch Center</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div>
+            <form class="row gy-2 gx-3 align-items-center" id="launch_cmd_form"> @*action="/action_page.php"*@ 
+                <div class="col-auto">
+                <label  for="autoSizingSelect">Choose Target</label>
+                <select class="form-select" id="launch_target_select">
+                    <option selected disabled>Select</option>
+                    <option value="1" id="launch_target1">Bird-9</option>
+                    <option value="2" id="launch_target2">Bird-Heavy</option>
+                    <option value="3" id="launch_target3">Hawk-Heavy</option>
+                </select>
+                </div>
+@*                <div class="col-auto">
+                <label for="autoSizingSelect">Choose Command</label>
+                <select class="form-select" id="lauch_command_select">
+                    <option selected disabled>Select</option>
+                    <option value="1"  >startData</option>
+  
+                </select>
+                </div> *@               
+                <div class="col-auto">
+                <button type="submit" class="btn btn-primary" id="launch_cmd_btn" disabled>Launch</button>
+                </div>
+                <img src="https://preview.redd.it/p19y1lt623q21.png?width=640&crop=smart&auto=webp&s=65496bff0f2cbdd1f334067bddcc7476fd928fc2" />
+            </form>
+        </div>
+
+        <br />
+@*        <div >
+            <label for="Textarea1" class="form-label">Command History</label>
+            <textarea class="form-control" id="payload_cmd_history" style="max-width:60%;height:100%;width:60%;" rows="4" readonly></textarea>
+        </div>*@
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!------------- Alerts Modal------------------------------------------------------------------------>
+<div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Alert</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div id="alert-body" class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!----------Launch Table-------------------------------------------------------------------------------->
 <table id="launch_table" > <!---class="table table-hover table-dark"-->
@@ -152,7 +228,7 @@
           In Progress
       </td>
       <td>
-         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal1p">View</button>
+         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paymodal1">View</button>
       </td>
     </tr>
     <tr>
@@ -169,7 +245,7 @@
           In Progress
       </td>
       <td>
-         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal2p">View</button>
+         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paymodal2">View</button>
       </td>
     </tr>
     <tr>
@@ -186,7 +262,7 @@
           N/A
       </td>
       <td>
-         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal1p">View</button>
+         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paymodal3">View</button>
       </td>
     </tr>
   </tbody>
@@ -199,7 +275,7 @@
   Launch demo modal
 </button>*@
 
-<!-- Modal1 -->
+<!----------------------- Modal1 ----------------------------------------------->
 <div class="modal fade" id="modal1" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -208,7 +284,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-            <h5 id="messageCount">0</h5>
+            <h5 id="messageCount1">0</h5>
             <ul id="messages" style="overflow: auto; max-height: 600px;">
             </ul>
             <!----------Telemetry Table-------------------------------------------------------------------------------->
@@ -254,7 +330,7 @@
   </div>
 </div>
 
-<!-- Modal2 -->
+<!------------------ Modal2 ----------------------------------------------------------------->
 <div class="modal fade" id="modal2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -306,7 +382,7 @@
   </div>
 </div>
 
-<!-- Modal3 -->
+<!--------------------- Modal3 ---------------------------------------------------------->
 <div class="modal fade" id="modal3" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -352,13 +428,170 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-        @*<button type="button" class="btn btn-primary">Save changes</button>*@
       </div>
     </div>
   </div>
 </div>
 
 
+<!-----------------------Payload Modal1 ----------------------------------------------->
+<div class="modal fade" id="paymodal1" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="payexampleModalLabel1">Telemetry Viewer</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+            <h5 id="messageCount">0</h5>
+            <ul id="messages" style="overflow: auto; max-height: 600px;">
+            </ul>
+            <!----------Telemetry Table-------------------------------------------------------------------------------->
+            <table class="table table-striped table-hover">
+@*              <thead>
+                <tr>
+                  <th scope="col" colspan="2" style="text-align:center">Telemetry Data</th>
+                </tr>
+              </thead>*@
+              <tbody>
+                <tr>
+                  <th scope="row">Altitude</th>
+                  <td id="altitudep1"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Longitude</th>
+                  <td id="longitudep1"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Latitude</th>
+                  <td colspan="2" id="latitudep1"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Temperature</th>
+                  <td colspan="2" id="temperaturep1"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Time to Orbit</th>
+                  <td colspan="2" id="time_to_orbitp1"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Time Formatted</th>
+                  <td colspan="2" id="time_formattedp1"></td>
+                </tr>                
+              </tbody>
+            </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+        @*<button type="button" class="btn btn-primary">Save changes</button>*@
+      </div>
+    </div>
+  </div>
+</div>
+
+<!------------------Payload Modal2 ----------------------------------------------------------------->
+<div class="modal fade" id="paymodal2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="payexampleModalLabel2">Telemetry Viewer</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+            <!----------Telemetry Table-------------------------------------------------------------------------------->
+            <table class="table table-striped table-hover">
+@*              <thead>
+                <tr>
+                  <th scope="col" colspan="2" style="text-align:center">Telemetry Data</th>
+                </tr>
+              </thead>*@
+              <tbody>
+                <tr>
+                  <th scope="row">Altitude</th>
+                  <td id="altitudep2"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Longitude</th>
+                  <td id="longitudep2"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Latitude</th>
+                  <td colspan="2" id="latitudep2"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Temperature</th>
+                  <td colspan="2" id="temperaturep2"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Time to Orbit</th>
+                  <td colspan="2" id="time_to_orbitp2"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Time Formatted</th>
+                  <td colspan="2" id="time_formattedp2"></td>
+                </tr>
+              </tbody>
+            </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+        @*<button type="button" class="btn btn-primary">Save changes</button>*@
+      </div>
+    </div>
+  </div>
+</div>
+
+<!---------------------Payload Modal3 ---------------------------------------------------------->
+<div class="modal fade" id="paymodal3" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="payexampleModalLabel3">Telemetry Viewer</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+            <!----------Telemetry Table-------------------------------------------------------------------------------->
+            <table class="table table-striped table-hover">
+@*              <thead>
+                <tr>
+                  <th scope="col" colspan="2" style="text-align:center">Telemetry Data</th>
+                </tr>
+              </thead>*@
+              <tbody>
+                <tr>
+                  <th scope="row">Altitude</th>
+                  <td id="altitudep3"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Longitude</th>
+                  <td id="longitudep3"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Latitude</th>
+                  <td colspan="2" id="latitudep3"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Temperature</th>
+                  <td colspan="2" id="temperaturep3"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Time to Orbit</th>
+                  <td colspan="2" id="time_to_orbitp3"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Time Formatted</th>
+                  <td colspan="2" id="time_formattedp3"></td>
+                </tr>
+              </tbody>
+            </table>
+            <img src="https://mars.nasa.gov/msl-raw-images/proj/msl/redops/ods/surface/sol/01000/opgs/edr/rcam/RLB_486265291EDR_F0481570RHAZ00323M_.JPG" alt="Image" width="480" height="330">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 @section scripts {

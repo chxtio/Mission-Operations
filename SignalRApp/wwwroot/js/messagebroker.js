@@ -16,7 +16,7 @@ signalrConnection.start().then(function () {
 var messageCount = 0;
 var lvDict = { "Bird-9": 1, "Bird-Heavy": 2, "Hawk-Heavy": 3 }
 var pDict = { "GPM": 1, "TDRS-11": 2, "RO-245": 3 }
-var lVehicles = { 1: { name: "Bird-9", launchStatus: "Launched", deployStatus: "Ready to Deploy" }, 2: { name: "Bird-Heavy", launchStatus: "Launched", deployStatus: "In Progress" }, 3: { name: "Hawk-Heavy", launchStatus: "Upcoming", deployStatus: "N/A" },}
+var lVehicles = { 1: { name: "Bird-9", launchStatus: document.getElementById("status1").innerText, deployStatus: document.getElementById("deploy1").innerText }, 2: { name: "Bird-Heavy", launchStatus: document.getElementById("status2").innerText, deployStatus: document.getElementById("deploy2").innerText }, 3: { name: "Hawk-Heavy", launchStatus: document.getElementById("status3").innerText, deployStatus: document.getElementById("deploy3").innerText },}
 $('#alertBtn').hide();
 $('#payloadBtn').hide();
 
@@ -83,7 +83,6 @@ $(document).ready(function () {
         console.log("launch status: " + launchStatus);
 
         if (launchStatus === "Launched") {
-            //var test = $('#launch_target' + lvId).find(".selected").text();
             console.log("launch form | disable " + target);
             
             $('#launch_target' + lvId).prop('disabled', true);
@@ -104,6 +103,8 @@ $(document).ready(function () {
         });
 
         $('#launch_target_select').val('0');
+        
+        launch(lvDict[target]);
     })
 
     // -------------------Command Center -------------------------------------------------
@@ -203,6 +204,10 @@ $(document).ready(function () {
         $('#payload_command_select').val('0');
     })
 
+
+
+    
+
 });
 
 function reachedOrbit(lvId) {
@@ -229,4 +234,17 @@ function deploy(lvId) {
     lVehicles[lvId]["deployStatus"] = "Deployed";
     $('#choosePayl' + lvId).prop('disabled', false);
     $('#payloadBtn').show();
+}
+
+function launch(lvId) {
+    console.log("launch(): ");
+    lVehicles[lvId]["launchStatus"] = "Launched";
+    var launchStatus = document.getElementById("status" + lvId);
+    launchStatus.innerHTML = "Launched";
+    launchStatus.className = "success";
+
+    var deployStatus = document.getElementById("deploy" + lvId);
+    deployStatus.innerHTML = "In Progress";
+    deployStatus.className = "deploy-status in-progress";
+    lVehicles[lvId]["deployStatus"] = "In Progress";
 }

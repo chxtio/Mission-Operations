@@ -13,14 +13,14 @@
 </div>*@
 
 <div class="top-buttons">
+    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#launchModal" id="launchBtn">Launch</button>
     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#cmdModal">Commands</button>
     <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#PayloadModal" id="payloadBtn">Payload</button>
-    <button type="button" class="btn btn-success">Success</button>
     <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#alertModal" id="alertBtn">Alerts</button>
-    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#launchModal" id="launchBtn">Launch</button>
-    <button type="button" class="btn btn-info">Info</button>
+    @*<button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#launchModal" id="launchBtn">Launch</button>*@
+@*    <button type="button" class="btn btn-info">Info</button>
     <button type="button" class="btn btn-light">Light</button>
-    <button type="button" class="btn btn-dark">Dark</button>
+    <button type="button" class="btn btn-dark">Dark</button>*@
 </div>
 
 <!-----------top buttons- modals---------------------------------------->
@@ -29,9 +29,27 @@
   Launch demo modal
 </button>*@
 
+<!------------- Alerts Modal------------------------------------------------------------------------>
+<div class="modal fade" id="alertModal" aria-hidden="true" aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+  <div class="modal-dialog ">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalToggleLabel">Alerts</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div id="alert-body" class="modal-body">
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-primary" data-bs-target="#cmdModal" data-bs-toggle="modal" data-bs-dismiss="modal">Open Command Center</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!------------- Commands Modal------------------------------------------------------------------------>
 <div class="modal fade" id="cmdModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Command Center</h5>
@@ -72,18 +90,21 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-secondary"  data-bs-dismiss="modal">Close</button> @*data-bs-target="#alertModal" data-bs-toggle="modal"*@
       </div>
     </div>
   </div>
 </div>
+@*<a class="btn btn primary" data-bs-toggle="modal" href="#alertModal" role="button">Open first modal</a>*@
+
+
 
 <!------------- Payload Command Modal------------------------------------------------------------------------>
-<div class="modal fade" id="PayloadModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+<div class="modal fade" id="PayloadModal" tabindex="-1" aria-labelledby="exampleModalToggleLabel2" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered"> <!--modal-dialog-centered"-->
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Payload Command Center</h5>
+        <h5 class="modal-title" id="exampleModalToggleLabel2">Payload Command Center</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -127,6 +148,7 @@
     </div>
   </div>
 </div>
+
 
 <!------------- Launch Modal------------------------------------------------------------------------>
 <div class="modal fade" id="launchModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -176,23 +198,7 @@
   </div>
 </div>
 
-<!------------- Alerts Modal------------------------------------------------------------------------>
-<div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Alert</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div id="alert-body" class="modal-body">
-        ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
+
 
 <!----------Launch Table-------------------------------------------------------------------------------->
 <table id="launch_table" > <!---class="table table-hover table-dark"-->
@@ -216,16 +222,17 @@
     <tr>
       <th scope="row">1</th>
       <td >Bird-9</td>
-      <td id="status1">
-          <span class="success">Launched</span>
+      <td >
+          @*<span id="status1" class="not-launched">Upcoming</span>*@
+          <span id="status1" class="success">Launched</span>
       </td>
       <td>
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal1">View
           </button>
       </td>
       <td id="tto1">N/A</td>
-      <td id="deploy1" class="deploy-status in-progress">
-          In Progress
+      <td id="deploy1" class="deploy-status offline">
+          N/A
       </td>
       <td>
          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paymodal1">View</button>
@@ -234,15 +241,15 @@
     <tr>
       <th scope="row">2</th>
       <td>Bird-Heavy</td>
-      <td id="status2">
-          <span class="success">Launched</span>
+      <td >
+          <span id="status2" class="not-launched">Upcoming</span>
       </td>
       <td>
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal2" >View</button>
       </td>
       <td id="tto2">N/A</td>
-      <td id="deploy2" class="deploy-status in-progress">
-          In Progress
+      <td id="deploy2" class="deploy-status offline">
+          N/A
       </td>
       <td>
          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paymodal2">View</button>
@@ -251,8 +258,8 @@
     <tr>
       <th scope="row">3</th>
       <td>Hawk-Heavy</td>
-      <td id="status3" class="launch_status_cell">
-          <span class="not-launched">Upcoming</span>
+      <td>
+          <span id="status3" class="not-launched">Upcoming</span>
       </td>
       <td>
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal3">View</button>
@@ -600,32 +607,25 @@
 <!--Reference the messagebroker script. -->
 <script src="~/js/messagebroker.js"></script>
 <script>
-    //localStorage.stat1 = document.getElementById("status1").innerText;
-    ////console.log("localStroage.stat1: " + localStorage.stat1);
-    //localStorage.stat2 = document.getElementById("status2").innerText;
-    ////console.log("localStroage.stat2: " + localStorage.stat2);
-    //localStorage.stat3 = document.getElementById("status3").innerText;
-    ////console.log("localStroage.stat3: " + localStorage.stat3);
+    //var status1 = document.getElementById("status1").innerText;
+    //var status2 = document.getElementById("status2").innerText;
+    //var status3 = document.getElementById("status3").innerText;
+    //var deploy1 = document.getElementById("deploy1").innerText;
+    //var deploy2 = document.getElementById("deploy2").innerText;
+    //var deploy3 = document.getElementById("deploy3").innerText;
 
-    var status1 = document.getElementById("status1").innerText;
-    var status2 = document.getElementById("status2").innerText;
-    var status3 = document.getElementById("status3").innerText;
-    var deploy1 = document.getElementById("deploy1").innerText;
-    var deploy2 = document.getElementById("deploy2").innerText;
-    var deploy3 = document.getElementById("deploy3").innerText;
-
-    var vehicles = {"items":[{name:"Bird-9", id: 1, launchStatus: status1, deployStatus: deploy1}, {name:"Bird-Heavy", id: 2, launchStatus: status2, deployStatus: deploy2},{name:"Hawk-Heavy",id: 3, launchStatus: status3, deployStatus: deploy3}]};
+    //var vehicles = {"items":[{name:"Bird-9", id: 1, launchStatus: status1, deployStatus: deploy1}, {name:"Bird-Heavy", id: 2, launchStatus: status2, deployStatus: deploy2},{name:"Hawk-Heavy",id: 3, launchStatus: status3, deployStatus: deploy3}]};
     
-    //localStorage.clear();
-    if (!localStorage.getItem('vehicles')) {
-        localStorage.setItem('vehicles', JSON.stringify(vehicles));
-    }    
+    ////localStorage.clear();
+    //if (!localStorage.getItem('vehicles')) {
+    //    localStorage.setItem('vehicles', JSON.stringify(vehicles));
+    //}    
     
-    var lvItems = JSON.parse(localStorage.getItem('vehicles'));
-    var launchStatus = lvItems["items"][1]["launchStatus"];
-    var deployStatus = lvItems["items"][1]["deployStatus"];
-    console.log("launchStatus: " + launchStatus);
-    console.log("onIndex: Bird-Heavy deployStatus: " + deployStatus);
+    //var lvItems = JSON.parse(localStorage.getItem('vehicles'));
+    //var launchStatus = lvItems["items"][1]["launchStatus"];
+    //var deployStatus = lvItems["items"][1]["deployStatus"];
+    //console.log("launchStatus: " + launchStatus);
+    //console.log("onIndex: Bird-Heavy deployStatus: " + deployStatus);
 
 </script>
 @*<script src="https://code.jquery.com/jquery-3.5.0.js"></script>*@

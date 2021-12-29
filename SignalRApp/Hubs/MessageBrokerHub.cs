@@ -14,15 +14,6 @@ namespace SignalRApp
         }
 
         // Publish message to (topic/exchange) to broker to control launch vehicle
-        public async Task CommandReceived(string lightColor, bool state)
-        {
-            await _signalProcessorManager.PublishCommandMessage(new CommandMessage(
-                id: Guid.NewGuid().ToString("N"),
-                lightColor: lightColor,
-                state: state,
-                createdDateTime: DateTime.UtcNow));
-        }
-
         public async Task cmdReceived(string type, string target, string command)
         {
             await _signalProcessorManager.PublishCmdMessage(new cmdMessage(

@@ -57,8 +57,8 @@ signalrConnection.on("onMessageReceived", function (eventMessage) {
             document.getElementById("tto" + p + id).innerText = timeToOrbit;
             document.getElementById("time_formatted" + p + id).innerText = createdDateTime;
 
-            console.log("id: " + id);
-            console.log("tto: " + timeToOrbit);
+            console.log("id: " + p + id);
+            //console.log("tto: " + timeToOrbit);
 
             if (timeToOrbit === 0) {
                 reachedOrbit(id)

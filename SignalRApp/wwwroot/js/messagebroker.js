@@ -54,7 +54,7 @@ signalrConnection.on("onMessageReceived", function (eventMessage) {
             document.getElementById("latitude" + p + id).innerText = latitude;
             document.getElementById("temperature" + p + id).innerText = temperature;
             document.getElementById("time_to_orbit" + p + id).innerText = timeToOrbit;
-            document.getElementById("tto" + p + id).innerText = timeToOrbit;
+            document.getElementById("tto" + p + id).innerText = timeToOrbit + " second(s)";
             document.getElementById("time_formatted" + p + id).innerText = createdDateTime;
 
             console.log("id: " + p + id);

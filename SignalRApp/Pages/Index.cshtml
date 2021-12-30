@@ -5,15 +5,19 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Deep Space Network</h1>
+    <h1 class="display-4">Deep Space Netw<i class="fas fa-satellite-dish fa-spin" style="font-size:28px"></i>rk </h1>
+    @*<span class="bi bi-moon"></span>*@
+    @*<i class="fa fa-moon-o" style="font-size:56px"></i>*@
+
 </div>
+
 
 @*<div class="d-grid gap-2 d-md-block">
   <button class="btn btn-primary" type="button">Button</button>
 </div>*@
 
 <div class="top-buttons">
-    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#launchModal" id="launchBtn">Launch</button>
+    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#launchModal" id="launchBtn">Launch </button></button>
     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#cmdModal">Commands</button>
     <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#PayloadModal" id="payloadBtn">Payload</button>
     <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#alertModal" id="alertBtn">Alerts</button>
@@ -272,7 +276,7 @@
       </td>
       <td>
          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paymodal3">View</button>
-      </td>
+      </td>      
     </tr>
   </tbody>
 </table>
@@ -379,6 +383,7 @@
                 <tr>
                   <th scope="row">Time Formatted</th>
                   <td colspan="2" id="time_formatted2"></td>
+                  @*<td colspan="2" ><input id="time_formatted2" type="text" placeholder="" disabled></td>*@
                 </tr>
               </tbody>
             </table>
@@ -601,7 +606,6 @@
     </div>
   </div>
 </div>
-
 
 @section scripts {
 <!--Reference the SignalR library. -->

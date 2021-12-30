@@ -47,18 +47,34 @@ namespace LaunchVehicle
                 if (lvDict.ContainsKey(cmd_target))
                 {
                     lvId = lvDict[cmd_target];
-                    //Console.WriteLine("lvId: " + lvId);
                 }
-                Console.WriteLine("Target " + cmd_target + " | command: " + command);
+                Console.WriteLine("Target: " + cmd_target + " | command: " + command);
 
-                if (command == "StartTelemetry")
+                switch (command)
                 {
-                    t = Task.Run(() => seedData(task_num, messageBrokerPublisher, cmd_type, lvId, token), token);
-                    Console.WriteLine("Target {0} | Task {1} executing", cmd_target, t.Id);
-                    tasks.Add(t);
-                    task_num += 1;
-                    await Task.Delay(1000);
-                    //tokenSource.Cancel(); 
+                    case "Launch":
+                        Console.WriteLine("Launching vehicle: " + cmd_target);
+                        //var process = new Process();
+                        //p.StartInfo.FileName = @"..\..\..\..\..\..\text.txt";
+                        //process.StartInfo.FileName = @"C:\Program Files\Notepad++\notepad++.exe"; //"D:\OneDrive\Projects\csharp\Deep-Space-Network\LaunchVehicle\bin\Debug\net6.0\LaunchVehicle.exe";
+                        //process.Start();
+                        //process.WaitForExit();
+
+                        var notepad = await RunProcessAsync(@"C:\Program Files\Notepad++\notepad++.exe");
+
+                        Console.WriteLine("Started process");
+                        break;
+                    case "StartTelemetry":
+                        t = Task.Run(() => seedData(task_num, messageBrokerPublisher, cmd_type, lvId, token), token);
+                        Console.WriteLine("Target {0} | Task {1} executing", cmd_target, t.Id);
+                        tasks.Add(t);
+                        task_num += 1;
+                        await Task.Delay(1000);
+                        //tokenSource.Cancel();
+                        break;
+                    default:
+                        Console.WriteLine("Command not recognized: " + command);
+                        break;
                 }
 
                 //// Request cancellation from the UI thread.
@@ -92,32 +108,6 @@ namespace LaunchVehicle
             //var messageBrokerPublisher = MessageBrokerPublisherFactory.Create(messageBrokerType);
             Console.WriteLine("Waiting to Start Publishing Messages");
 
-
-
-            ////Generate telemetry data
-            //var altitude = 400.0;
-            //var longitude = -45.34;
-            //var latitude = -25.34;
-            //var temperature = 340.0;
-            //var timeToOrbit = 10.0;
-
-            //// Uncomment for debugging
-            ////publishMessages = true;
-
-            //var cts = new CancellationTokenSource();
-            //var ct = cts.Token;
-
-            //var tokenSource = new CancellationTokenSource();
-            //var token = tokenSource.Token;
-            //Task t;
-            //var tasks = new ConcurrentBag<Task>();
-
-            //Console.WriteLine("Press any key to begin tasks...");
-            //Console.ReadKey(true);
-            //Console.WriteLine("To terminate the example, press 'c' to cancel and exit...");
-            //Console.WriteLine();
-
-            //Console.WriteLine("publishMessages = " + publishMessages);
             do
             {
                 while (publishMessages)
@@ -128,84 +118,10 @@ namespace LaunchVehicle
                 }
             }
             while (true);
-
-            //if (publishMessages)
-            //{
-            //    Console.WriteLine("test!");
-            //    t = Task.Run(() => DoSomeWork(1, messageBrokerPublisher, token), token);
-            //    Console.WriteLine("Task {0} executing", t.Id);
-            //    tasks.Add(t);
-            //}            
-
-            //// Request cancellation from the UI thread.
-            //char ch = Console.ReadKey().KeyChar;
-            //if (ch == 'c' || ch == 'C' || command == "StopTelemetry")
-            //{
-            //    tokenSource.Cancel();
-            //    Console.WriteLine("\nTask cancellation requested.");
-
-            //    // Optional: Observe the change in the Status property on the task.
-            //    // It is not necessary to wait on tasks that have canceled. However,
-            //    // if you do wait, you must enclose the call in a try-catch block to
-            //    // catch the TaskCanceledExceptions that are thrown. If you do
-            //    // not wait, no exception is thrown if the token that was passed to the
-            //    // Task.Run method is the same token that requested the cancellation.
-            //}
-
-            //// Display status of all tasks.
-            //foreach (var task in tasks)
-            //    Console.WriteLine("Task {0} status is now {1}", task.Id, task.Status);
-
-
-
-            //do
-            //{
-            //    while (publishMessages)
-            //    {
-            //        // Simulate telemetry 
-
-            //        var messageId = Guid.NewGuid().ToString("N");
-            //        var teleMessage = new TeleMessage(cmd_type, messageId, lvId, altitude, longitude, latitude, temperature, timeToOrbit, DateTime.UtcNow);
-            //        var json = JsonSerializer.Serialize(teleMessage);
-            //        var eventMessage = new EventMessage(messageId, json, DateTime.UtcNow);
-            //        var eventMessageJson = JsonSerializer.Serialize(eventMessage); // Serialize message to Json
-            //        var messageBytes = Encoding.UTF8.GetBytes(eventMessageJson);
-            //        var message = new Message(messageBytes, messageId, "application/json"); // Adapter design pattern
-            //        await messageBrokerPublisher.Publish(message);
-            //        Console.WriteLine($"{messageId}: {eventMessageJson}\n");
-
-            //        await Task.Delay(1000);
-
-            //        // Update with random values
-            //        messageId = Guid.NewGuid().ToString("N");
-            //        altitude += 10d;
-            //        longitude -= 10d;
-            //        latitude -= 10d;
-            //        temperature -= 2d;
-            //        if (timeToOrbit > 0d)
-            //        {
-            //            timeToOrbit -= 1d;
-            //        }
-            //        else if (timeToOrbit == 0d)
-            //        {
-            //            //deployable = true;
-            //            Console.WriteLine("Ready to deploy payload for launch vehicle: " + cmd_target);
-            //        }
-
-            //        if (!publishMessages)
-            //        {
-            //            break;
-            //        }
-            //    }
-            //}
-            //while (true);
-
-
         }
 
         static void seedData(int taskNum, PublisherBase messageBrokerPublisher, string cmd_type, int lvId, CancellationToken ct)
         {
-            // Was cancellation already requested?
             if (ct.IsCancellationRequested)
             {
                 Console.WriteLine("Task {0} was cancelled before it got started.",
@@ -213,12 +129,15 @@ namespace LaunchVehicle
                 ct.ThrowIfCancellationRequested();
             }
 
-            int maxIterations = 10;
+            Random random = new Random();
+            int maxIterations = 500;
             var altitude = 400.0;
             var longitude = -45.34;
             var latitude = -25.34;
             var temperature = 340.0;
-            var timeToOrbit = 10.0;
+            var orbitRadius = 36000.0;
+            var timeToOrbit = orbitRadius / 3600 + 10;
+            Console.WriteLine("Estimated time to reach orbit: " + timeToOrbit);
 
             for (int i = 0; i <= maxIterations; i++)
             {
@@ -236,13 +155,14 @@ namespace LaunchVehicle
 
                 // Update with random values
                 messageId = Guid.NewGuid().ToString("N");
-                altitude += 10d;
-                longitude -= 10d;
-                latitude -= 10d;
-                temperature -= 2d;
+                altitude += random.NextDouble();
+                longitude -= 10d + random.NextDouble(); ;
+                latitude -= 10d - random.NextDouble(); ;
+                temperature -= random.NextDouble();
                 if (timeToOrbit > 0d)
                 {
                     timeToOrbit -= 1d;
+                    // Send alert to DSN
                 }
 
                 if (ct.IsCancellationRequested)
@@ -294,6 +214,27 @@ namespace LaunchVehicle
 
             return toPublish;
 
+        }
+
+        private static Task<int> RunProcessAsync(string fileName)
+        {
+            var tcs = new TaskCompletionSource<int>();
+
+            var process = new Process
+            {
+                StartInfo = { FileName = fileName },
+                EnableRaisingEvents = true
+            };
+
+            process.Exited += (sender, args) =>
+            {
+                tcs.SetResult(process.ExitCode);
+                process.Dispose();
+            };
+
+            process.Start();
+
+            return tcs.Task;
         }
 
         private static IEnumerable<string> GetTitles(string filename)

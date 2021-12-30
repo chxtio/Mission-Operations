@@ -100,6 +100,7 @@ body {
   width: 100%;
   white-space: nowrap;
   line-height: 60px;  Vertically center the text there 
+  margin-top: 50px;
 }
 
 .deploy-status.open:before {
@@ -130,12 +131,12 @@ body {
     border-radius: 7px;
 }
 
-#launch_table {
+/*#launch_table {
     color: white; 
     background-color: rgba(3, 5, 7, 0.5); 
     margin: auto;
     width: 100%
-}
+}*/
 
 .top-buttons {
     margin-top: 40px;
@@ -154,3 +155,53 @@ body {
     background-size: cover;
 }*/
 
+/*table td input {
+    position: absolute;
+    display: block;
+    top: 0;
+    left: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    border: none;
+    padding: 20px;
+    box-sizing: border-box;
+}*/
+
+table {
+    /* width: 100%; */
+    width: 1000px;
+    /* margin: auto; */
+    margin: 10px auto 70px auto;
+    /* margin-top: 100px; */
+    /*background-color: #272822;*/
+    background-color: rgba(3, 5, 7, 0.5);
+    color: #f8f8f2;
+    border-spacing: 0;
+    border-bottom: 5px solid #272822;
+    /* border: 7px solid #024416; */
+    border-radius: 2px;
+    box-shadow: 0 0 30px #1b0678; /*#160173 #1b0678; #19965b;*/
+}
+
+th {
+    padding: 10px 10px;
+}
+
+td {
+    padding: 10px;
+    text-align: center;
+}
+
+h1 {
+    /*font-size: 25px;*/
+    text-shadow: 0 0 13px #FFF;
+}
+
+.moon {
+    /*margin-left: -35px;*/
+    height: 80px;
+    width: 80px;
+    border-radius: 50%;
+    box-shadow: 15px 15px 0 0 #d0d5d2;
+}

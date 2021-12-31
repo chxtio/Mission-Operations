@@ -14,9 +14,10 @@ signalrConnection.start().then(function () {
 });
 
 var messageCount = 0;
+var alertCount = 0;
 var lvDict = { "Bird-9": 1, "Bird-Heavy": 2, "Hawk-Heavy": 3 }
 var pDict = { "GPM": 1, "TDRS-11": 2, "RO-245": 3 }
-var lVehicles = { 1: { name: "Bird-9", launchStatus: document.getElementById("status1").innerText, deployStatus: document.getElementById("deploy1").innerText }, 2: { name: "Bird-Heavy", launchStatus: document.getElementById("status2").innerText, deployStatus: document.getElementById("deploy2").innerText }, 3: { name: "Hawk-Heavy", launchStatus: document.getElementById("status3").innerText, deployStatus: document.getElementById("deploy3").innerText },}
+var lVehicles = { 1: { name: "Bird-9", launchStatus: document.getElementById("status1").innerText, deployStatus: document.getElementById("deploy1").innerText, payload: "GPM" }, 2: { name: "Bird-Heavy", launchStatus: document.getElementById("status2").innerText, deployStatus: document.getElementById("deploy2").innerText, payload: "TDRS-11" }, 3: { name: "Hawk-Heavy", launchStatus: document.getElementById("status3").innerText, deployStatus: document.getElementById("deploy3").innerText, payload: "RO-245" } };
 $('#alertBtn').hide();
 $('#payloadBtn').hide();
 
@@ -37,14 +38,19 @@ signalrConnection.on("onMessageReceived", function (eventMessage) {
             var json = JSON.parse(eventMessage["title"]);
             var type = json["Type"];
             var id = json["LvId"];
+            var createdDateTime = json["CreatedDateTime"];
             var p = "";
             console.log("type: " + type);
 
             if (type === "launch_command") {
                 if (json["Status"] === "Launched") {
-                    launch(id);
+                    launch(id, createdDateTime);
                 }                
-            } else {
+            } else if (type === "Reached Orbit Alert") {
+                console.log("Reached Orbit Alert");
+                reachedOrbit(id, createdDateTime);
+            }
+            else {
                 if (type == "payload_command") {
                     p = "p";
                 }
@@ -54,8 +60,7 @@ signalrConnection.on("onMessageReceived", function (eventMessage) {
                 var longitude = json["Longitude"];
                 var latitude = json["Latitude"];
                 var temperature = json["Temperature"];
-                var timeToOrbit = json["TimeToOrbit"];
-                var createdDateTime = json["CreatedDateTime"];
+                var timeToOrbit = json["TimeToOrbit"];                
 
                 //document.getElementById("exampleModalLabel" + p + id).innerText = 
                 document.getElementById("tlmCount" + p + id).innerText = "Telemetry Received: " + count.toString();
@@ -70,9 +75,9 @@ signalrConnection.on("onMessageReceived", function (eventMessage) {
                 console.log("id: " + p + id);
                 //console.log("tto: " + timeToOrbit);
 
-                if (timeToOrbit === 0) {
-                    reachedOrbit(id)
-                }
+                //if (timeToOrbit === 0) {
+                //    reachedOrbit(id)
+                //}
             }          
 
         }    
@@ -171,7 +176,7 @@ $(document).ready(function () {
         e.preventDefault();
         const target = $('#targetSelect').find(":selected").text();
         const cmd = $('#commandSelect').find(":selected").text();
-          var text = $('#cmdHistory')
+        var text = $('#cmdHistory')
         text.val(text.val() + target + " | " + cmd + "\n");
         console.log("Target: " + target + " Command: " + cmd);
 
@@ -204,7 +209,7 @@ $(document).ready(function () {
         e.preventDefault();
         const target = $('#payload_target_select').find(":selected").text();
         const cmd = $('#payload_command_select').find(":selected").text();
-        var text = $('#payload_cmd_history')
+        var text = $('#payload_cmd_history');
         text.val(text.val() + target + " | " + cmd + "\n");
         console.log("Target: " + target + " Command: " + cmd);
 
@@ -216,13 +221,17 @@ $(document).ready(function () {
         $('#payload_command_select').val('0');
     })
 
+    $('.modal').on('show.bs.modal', function (e) {
+        if (e.currentTarget.id === "alertModal") {
+            alertCount = 0;
+            $('#alertBtn').hide();
+        }
+    })
 
-
-    
 
 });
 
-function reachedOrbit(lvId) {
+function reachedOrbit(lvId, createdTime) {
     // Change payload status to ready to deploy
     var deployStatus = document.getElementById("deploy" + lvId);
     if (deployStatus.innerHTML === "Ready to Deploy" || deployStatus.innerHTML === "Deployed") {
@@ -232,10 +241,8 @@ function reachedOrbit(lvId) {
     deployStatus.className = "deploy-status open";
     lVehicles[lvId]["deployStatus"] = "Ready to Deploy";
 
-    console.log("alert");
-    $('#alertBtn').show();
-    //$('#alertModal').modal('show');    
-    document.getElementById("alert-body").innerHTML = "Payload is ready to deploy";
+    var alertMessage = createdTime + "  |  Ready to deploy " + lVehicles[lvId]["payload"];
+    alert(alertMessage);
 }
 
 function deploy(lvId) {
@@ -248,15 +255,26 @@ function deploy(lvId) {
     $('#payloadBtn').show();
 }
 
-function launch(lvId) {
+function launch(lvId, createdTime) {
     console.log("launch(): ");
     lVehicles[lvId]["launchStatus"] = "Launched";
     var launchStatus = document.getElementById("status" + lvId);
     launchStatus.innerHTML = "Launched";
     launchStatus.className = "success";
 
+    var alertMessage = createdTime + "  |  " + lVehicles[lvId]["name"] + " has launched";
+    alert(alertMessage);
+
     var deployStatus = document.getElementById("deploy" + lvId);
     deployStatus.innerHTML = "In Progress";
     deployStatus.className = "deploy-status in-progress";
     lVehicles[lvId]["deployStatus"] = "In Progress";
+}
+
+function alert(message) {
+    $('#alertBtn').show();
+    alertCount++;
+    document.getElementById("alertBadge").innerHTML = alertCount;
+    var text = $('#alert_history');
+    text.val(text.val() + message + "\n");
 }

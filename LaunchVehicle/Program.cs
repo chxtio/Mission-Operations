@@ -81,14 +81,7 @@ namespace LaunchVehicle
                     //process.WaitForExit();
                     var testSeed = RunProcessAsync(@"D:\OneDrive\Projects\csharp\Deep-Space-Network\Seeder\bin\Debug\net6.0\Seeder.exe");
                     // Alert DSN about launch
-                    var messageId = Guid.NewGuid().ToString("N");
-                    var teleMessage = new LaunchMessage(cmd_type, messageId, lvId, "Launched", DateTime.UtcNow);
-                    var json = JsonSerializer.Serialize(teleMessage);
-                    var eventMessage = new EventMessage(messageId, json, DateTime.UtcNow);
-                    var eventMessageJson = JsonSerializer.Serialize(eventMessage); // Serialize message to Json
-                    var messageBytes = Encoding.UTF8.GetBytes(eventMessageJson);
-                    var message = new Message(messageBytes, messageId, "application/json"); // Adapter design pattern
-                    await messageBrokerPublisher.Publish(message);
+                    updateStatus(cmd_type, lvId, "Launch", messageBrokerPublisher);
                     Console.WriteLine(cmd_target + " launched successfully");
                     break;
                 case "StartTelemetry":
@@ -146,7 +139,19 @@ namespace LaunchVehicle
             while (true);
         }
 
-        static void seedData(int taskNum, PublisherBase messageBrokerPublisher, string cmd_type, int lvId, CancellationToken ct)
+        private static void updateStatus(string cmd_type, int lvId, string update, PublisherBase messageBrokerPublisher)
+        {
+            var messageId = Guid.NewGuid().ToString("N");
+            var teleMessage = new StatusMessage(cmd_type, messageId, lvId, "Launched", DateTime.UtcNow);
+            var json = JsonSerializer.Serialize(teleMessage);
+            var eventMessage = new EventMessage(messageId, json, DateTime.UtcNow);
+            var eventMessageJson = JsonSerializer.Serialize(eventMessage); // Serialize message to Json
+            var messageBytes = Encoding.UTF8.GetBytes(eventMessageJson);
+            var message = new Message(messageBytes, messageId, "application/json"); // Adapter design pattern
+            messageBrokerPublisher.Publish(message);            
+        }
+
+        private static void seedData(int taskNum, PublisherBase messageBrokerPublisher, string cmd_type, int lvId, CancellationToken ct)
         {
             if (ct.IsCancellationRequested)
             {
@@ -164,6 +169,7 @@ namespace LaunchVehicle
             var temperature = 340.0;
             var orbitRadius = 36000.0;
             var timeToOrbit = orbitRadius / 3600 + 10;
+            var alerted = false;
             //Console.WriteLine("Estimated time to reach orbit: " + timeToOrbit);
 
             while (!ct.IsCancellationRequested)
@@ -192,7 +198,16 @@ namespace LaunchVehicle
                     if (timeToOrbit > 0d)
                     {
                         timeToOrbit -= 1d;
-                        // To do: Send alert to DSN
+                        // Send alert to DSN                        
+                    } else if (timeToOrbit == 0d)
+                    {                        
+                        if (!alerted)
+                        {
+                            Console.WriteLine("Sending reached orbit alert");
+                            updateStatus("Reached Orbit Alert", lvId, "Reached Orbit Alert", messageBrokerPublisher);
+                            alerted = true;
+                        }
+                        
                     }
 
                     if (ct.IsCancellationRequested)

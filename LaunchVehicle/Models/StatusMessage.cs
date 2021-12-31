@@ -2,7 +2,7 @@
 
 namespace LaunchVehicle
 {
-    public sealed class LaunchMessage
+    public sealed class StatusMessage
     {
         public string Type { get; }
         public string Id { get; }
@@ -11,7 +11,7 @@ namespace LaunchVehicle
 
         public DateTime CreatedDateTime { get; }
 
-        public LaunchMessage(string type, string id, int lvId, string status, DateTime createdDateTime)
+        public StatusMessage(string type, string id, int lvId, string status, DateTime createdDateTime)
         {
             Type = type;
             Id = id;

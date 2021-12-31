@@ -22,11 +22,11 @@ $('#payloadBtn').hide();
 
 // Subscribe to onMessageReceived (client-side hub method) to show incoming messages from backend
 signalrConnection.on("onMessageReceived", function (eventMessage) {
-    messageCount++;
-    const msgCountH4 = document.getElementById("messageCount");
-    msgCountH4.innerText = "Telemetry Packets: " + messageCount.toString();
+    //messageCount++;
+    //const msgCountH4 = document.getElementById("messageCount");
+    //msgCountH4.innerText = "Total Telemetry Packets: " + messageCount.toString();
 
-    console.log("Messages: " + messageCount.toString());
+    //console.log("Messages: " + messageCount.toString());
 
     for (const property in eventMessage) {
 
@@ -36,33 +36,45 @@ signalrConnection.on("onMessageReceived", function (eventMessage) {
             console.log(eventMessage["title"]);
             var json = JSON.parse(eventMessage["title"]);
             var type = json["Type"];
-            console.log("type: " + type);
-            var p = "";
-            if (type == "payload_command") {
-                p = "p";
-            }
             var id = json["LvId"];
-            var altitude = json["Altitude"];
-            var longitude = json["Longitude"];
-            var latitude = json["Latitude"];
-            var temperature = json["Temperature"];
-            var timeToOrbit = json["TimeToOrbit"];
-            var createdDateTime = json["CreatedDateTime"];
+            var p = "";
+            console.log("type: " + type);
 
-            document.getElementById("altitude" + p + id).innerText = altitude;
-            document.getElementById("longitude" + p + id).innerText = longitude;
-            document.getElementById("latitude" + p + id).innerText = latitude;
-            document.getElementById("temperature" + p + id).innerText = temperature;
-            document.getElementById("time_to_orbit" + p + id).innerText = timeToOrbit;
-            document.getElementById("tto" + p + id).innerText = timeToOrbit + " second(s)";
-            document.getElementById("time_formatted" + p + id).innerText = createdDateTime;
+            if (type === "launch_command") {
+                if (json["Status"] === "Launched") {
+                    launch(id);
+                }                
+            } else {
+                if (type == "payload_command") {
+                    p = "p";
+                }
 
-            console.log("id: " + p + id);
-            //console.log("tto: " + timeToOrbit);
+                var count = json["Count"];
+                var altitude = json["Altitude"];
+                var longitude = json["Longitude"];
+                var latitude = json["Latitude"];
+                var temperature = json["Temperature"];
+                var timeToOrbit = json["TimeToOrbit"];
+                var createdDateTime = json["CreatedDateTime"];
 
-            if (timeToOrbit === 0) {
-                reachedOrbit(id)
-            }
+                //document.getElementById("exampleModalLabel" + p + id).innerText = 
+                document.getElementById("tlmCount" + p + id).innerText = "Telemetry Received: " + count.toString();
+                document.getElementById("altitude" + p + id).innerText = altitude;
+                document.getElementById("longitude" + p + id).innerText = longitude;
+                document.getElementById("latitude" + p + id).innerText = latitude;
+                document.getElementById("temperature" + p + id).innerText = temperature;
+                document.getElementById("time_to_orbit" + p + id).innerText = timeToOrbit;
+                document.getElementById("tto" + p + id).innerText = timeToOrbit + " second(s)";
+                document.getElementById("time_formatted" + p + id).innerText = createdDateTime;
+
+                console.log("id: " + p + id);
+                //console.log("tto: " + timeToOrbit);
+
+                if (timeToOrbit === 0) {
+                    reachedOrbit(id)
+                }
+            }          
+
         }    
 
     }
@@ -104,7 +116,7 @@ $(document).ready(function () {
 
         $('#launch_target_select').val('0');
         
-        launch(lvDict[target]);
+        /*launch(lvDict[target]);*/
     })
 
     // -------------------Command Center -------------------------------------------------

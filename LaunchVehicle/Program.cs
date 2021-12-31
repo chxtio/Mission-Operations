@@ -15,8 +15,9 @@ namespace LaunchVehicle
         static async Task Main()
         {
             var messageBrokerType = MessageBrokerType.RabbitMq;
-            // Create subscriber based on message broker type
+            // Create subscriber and publisher based on message broker type
             var subscriber = MessageBrokerSubscriberFactory.Create(messageBrokerType);
+            var messageBrokerPublisher = MessageBrokerPublisherFactory.Create(messageBrokerType);
 
             Dictionary<string, int> lvDict = new Dictionary<string, int>(3);
             lvDict.Add("Bird-9", 1);
@@ -24,25 +25,33 @@ namespace LaunchVehicle
             lvDict.Add("Hawk-Heavy", 3);
             var lvId = 0;
 
-            var publishMessages = false;
             var cmd_target = "";
             var cmd_type = "";
-            var command = "";
+            var command = "";           
 
-            var messageBrokerPublisher = MessageBrokerPublisherFactory.Create(messageBrokerType);
+            // Create Cancellation tokens for cancelable tasks (for launch vehicle and payload threads)
             var tokenSource1 = new CancellationTokenSource();
             var tokenSource2 = new CancellationTokenSource();
             var tokenSource3 = new CancellationTokenSource();
+            var tokenSourceP1 = new CancellationTokenSource();
+            var tokenSourceP2 = new CancellationTokenSource();
+            var tokenSourceP3 = new CancellationTokenSource();
 
             Dictionary<int, CancellationTokenSource> tokenSources = new Dictionary<int, CancellationTokenSource>(3);
             tokenSources.Add(1, tokenSource1);
             tokenSources.Add(2, tokenSource2);
             tokenSources.Add(3, tokenSource3);
+            tokenSources.Add(4, tokenSourceP1);
+            tokenSources.Add(5, tokenSourceP2);
+            tokenSources.Add(6, tokenSourceP3);
 
             Dictionary<int, CancellationToken> tokens = new Dictionary<int, CancellationToken>(3);
             tokens.Add(1, tokenSource1.Token);
             tokens.Add(2, tokenSource2.Token);
             tokens.Add(3, tokenSource3.Token);
+            tokens.Add(4, tokenSourceP1.Token);
+            tokens.Add(5, tokenSourceP2.Token);
+            tokens.Add(6, tokenSourceP3.Token);
 
             var tasks = new ConcurrentBag<Task>();
             var task_num = 1;
@@ -71,19 +80,46 @@ namespace LaunchVehicle
                     //process.Start();
                     //process.WaitForExit();
                     var testSeed = RunProcessAsync(@"D:\OneDrive\Projects\csharp\Deep-Space-Network\Seeder\bin\Debug\net6.0\Seeder.exe");
+                    // Alert DSN about launch
+                    var messageId = Guid.NewGuid().ToString("N");
+                    var teleMessage = new LaunchMessage(cmd_type, messageId, lvId, "Launched", DateTime.UtcNow);
+                    var json = JsonSerializer.Serialize(teleMessage);
+                    var eventMessage = new EventMessage(messageId, json, DateTime.UtcNow);
+                    var eventMessageJson = JsonSerializer.Serialize(eventMessage); // Serialize message to Json
+                    var messageBytes = Encoding.UTF8.GetBytes(eventMessageJson);
+                    var message = new Message(messageBytes, messageId, "application/json"); // Adapter design pattern
+                    await messageBrokerPublisher.Publish(message);
                     Console.WriteLine(cmd_target + " launched successfully");
                     break;
                 case "StartTelemetry":
+                    int tokenNum;
+                    if (cmd_type == "command")
+                    {
+                        tokenNum = lvId; // Launch Vehicle
+                    } 
+                    else
+                    {
+                        tokenNum = lvId + 3; // Payload
+                    }
                     Task t;
-                    t = Task.Run(() => seedData(task_num, messageBrokerPublisher, cmd_type, lvId, tokens[lvId]), tokens[lvId]);
+                    t = Task.Run(() => seedData(task_num, messageBrokerPublisher, cmd_type, lvId, tokens[tokenNum]), tokens[tokenNum]);
                     task_num = t.Id;
                     Console.WriteLine("Target {0} | Task {1} executing", cmd_target, t.Id);
                     tasks.Add(t);
                     await Task.Delay(1000);
                     break;
                 case "StopTelemetry":
+                    int tokenNumb;
+                    if (cmd_type == "command")
+                    {
+                        tokenNumb = lvId;
+                    }
+                    else
+                    {
+                        tokenNumb = lvId + 3;
+                    }
                     Console.WriteLine("Task cancellation requested.");
-                    tokenSources[lvId].Cancel();
+                    tokenSources[tokenNumb].Cancel();
                     break;
                 case "DeployPayload":
                     Console.WriteLine("Releasing Payload...");
@@ -104,12 +140,8 @@ namespace LaunchVehicle
 
             do
             {
-                while (publishMessages)
-                {
-                    Console.WriteLine("Keep alive test");
-
-                    await Task.Delay(5000);
-                }
+                // Keep program running
+                await Task.Delay(5000);
             }
             while (true);
         }
@@ -124,7 +156,8 @@ namespace LaunchVehicle
             }
 
             Random random = new Random();
-            int maxIterations = 20;
+            int count;
+            var maxIterations = 500;
             var altitude = 400.0;
             var longitude = -45.34;
             var latitude = -25.34;
@@ -137,8 +170,9 @@ namespace LaunchVehicle
             {
                 for (int i = 0; i <= maxIterations; i++)
                 {
+                    count = i + 1;
                     var messageId = Guid.NewGuid().ToString("N");
-                    var teleMessage = new TeleMessage(cmd_type, messageId, lvId, altitude, longitude, latitude, temperature, timeToOrbit, DateTime.UtcNow);
+                    var teleMessage = new TeleMessage(cmd_type, messageId, lvId, count, altitude, longitude, latitude, temperature, timeToOrbit, DateTime.UtcNow);
                     var json = JsonSerializer.Serialize(teleMessage);
                     var eventMessage = new EventMessage(messageId, json, DateTime.UtcNow);
                     var eventMessageJson = JsonSerializer.Serialize(eventMessage); // Serialize message to Json

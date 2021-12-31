@@ -7,6 +7,7 @@ namespace LaunchVehicle
         public string Type { get; }
         public string Id { get; }
         public int LvId { get; }
+        public int Count { get; }
         public double Altitude { get; }
         public double Longitude { get; }
         public double Latitude { get; }
@@ -14,11 +15,12 @@ namespace LaunchVehicle
         public double TimeToOrbit { get; }
         public DateTime CreatedDateTime { get; }
 
-        public TeleMessage(string type, string id, int lvId, double altitude, double longitude, double latitude, double temperature, double timeToOrbit, DateTime createdDateTime)
+        public TeleMessage(string type, string id, int lvId, int count, double altitude, double longitude, double latitude, double temperature, double timeToOrbit, DateTime createdDateTime)
         {
             Type = type;
             Id = id;
             LvId = lvId;
+            Count = count;
             Altitude = altitude;
             Longitude = longitude;
             Latitude = latitude;

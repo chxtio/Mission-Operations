@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalRApp", "SignalRApp\Si
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LaunchVehicle", "LaunchVehicle\LaunchVehicle.csproj", "{A80558B5-CE1D-4CC9-BE4C-2C9B61DD6F14}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seeder", "Seeder\Seeder.csproj", "{A3DA0CA5-BBD9-4F2E-A425-47C3D423A890}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{A80558B5-CE1D-4CC9-BE4C-2C9B61DD6F14}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A80558B5-CE1D-4CC9-BE4C-2C9B61DD6F14}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A80558B5-CE1D-4CC9-BE4C-2C9B61DD6F14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3DA0CA5-BBD9-4F2E-A425-47C3D423A890}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3DA0CA5-BBD9-4F2E-A425-47C3D423A890}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3DA0CA5-BBD9-4F2E-A425-47C3D423A890}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3DA0CA5-BBD9-4F2E-A425-47C3D423A890}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

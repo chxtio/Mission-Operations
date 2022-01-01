@@ -23,8 +23,8 @@ namespace LaunchVehicle
             //    Console.WriteLine(key + " = " + settings[key]);
             //}
 
-            var messageBrokerType = MessageBrokerType.RabbitMq;
             // Create subscriber and publisher based on message broker type
+            var messageBrokerType = MessageBrokerType.RabbitMq;
             var subscriber = MessageBrokerSubscriberFactory.Create(messageBrokerType);
             var messageBrokerPublisher = MessageBrokerPublisherFactory.Create(messageBrokerType);
 
@@ -36,35 +36,24 @@ namespace LaunchVehicle
 
             var cmd_target = "";
             var cmd_type = "";
-            var command = "";           
+            var command = "";
 
             // Create Cancellation tokens for cancelable tasks (for launch vehicle and payload threads)
-            var tokenSource1 = new CancellationTokenSource();
-            var tokenSource2 = new CancellationTokenSource();
-            var tokenSource3 = new CancellationTokenSource();
-            var tokenSourceP1 = new CancellationTokenSource();
-            var tokenSourceP2 = new CancellationTokenSource();
-            var tokenSourceP3 = new CancellationTokenSource();
+            Dictionary<int, CancellationTokenSource> tokenSources = new Dictionary<int, CancellationTokenSource>(6);
+            Dictionary<int, CancellationToken> tokens = new Dictionary<int, CancellationToken>(6);
 
-            Dictionary<int, CancellationTokenSource> tokenSources = new Dictionary<int, CancellationTokenSource>(3);
-            tokenSources.Add(1, tokenSource1);
-            tokenSources.Add(2, tokenSource2);
-            tokenSources.Add(3, tokenSource3);
-            tokenSources.Add(4, tokenSourceP1);
-            tokenSources.Add(5, tokenSourceP2);
-            tokenSources.Add(6, tokenSourceP3);
-
-            Dictionary<int, CancellationToken> tokens = new Dictionary<int, CancellationToken>(3);
-            tokens.Add(1, tokenSource1.Token);
-            tokens.Add(2, tokenSource2.Token);
-            tokens.Add(3, tokenSource3.Token);
-            tokens.Add(4, tokenSourceP1.Token);
-            tokens.Add(5, tokenSourceP2.Token);
-            tokens.Add(6, tokenSourceP3.Token);
+            for (int i = 1; i <= 6; i++)
+            {
+                var tokenSource = new CancellationTokenSource();
+                var token = tokenSource.Token;
+                tokenSources.Add(i, tokenSource);
+                tokens.Add(i, token);
+            }
 
             var tasks = new ConcurrentBag<Task>();
             var task_num = 1;
 
+            // Subscribe to commands initiated by client
             subscriber.Subscribe(async (subs, messageReceivedEventArgs) =>
             {
             var body = messageReceivedEventArgs.ReceivedMessage.Body;
@@ -74,36 +63,24 @@ namespace LaunchVehicle
             command = commandMsg.Cmd;
             Console.WriteLine("Target: " + cmd_target + " | command: " + command);
 
-            if (lvDict.ContainsKey(cmd_target))
-            {
-                lvId = lvDict[cmd_target];
-            }            
+            if (lvDict.ContainsKey(cmd_target))            
+                lvId = lvDict[cmd_target];                     
 
             switch (command)
             {
                 case "Launch":
                     Console.WriteLine("Launching vehicle: " + cmd_target);
-                    //var process = new Process();
-                    //p.StartInfo.FileName = @"..\..\..\..\..\..\text.txt";
-                    //process.StartInfo.FileName = @"C:\Program Files\Notepad++\notepad++.exe"; //"D:\OneDrive\Projects\csharp\Deep-Space-Network\LaunchVehicle\bin\Debug\net6.0\LaunchVehicle.exe";
-                    //process.Start();
-                    //process.WaitForExit();
-
-                    var testSeed = RunProcessAsync(@"D:\OneDrive\Projects\csharp\Deep-Space-Network\Seeder\bin\Debug\net6.0\Seeder.exe");
+                    var testSeed = RunProcessAsync(@"..\..\..\..\Seeder\bin\Debug\net6.0\Seeder.exe");
                     // Alert DSN about launch
                     updateStatus(cmd_type, lvId, "Launch", messageBrokerPublisher);
                     Console.WriteLine(cmd_target + " launched successfully");
                     break;
                 case "StartTelemetry":
                     int tokenNum;
-                    if (cmd_type == "command")
-                    {
-                        tokenNum = lvId; // Launch Vehicle
-                    } 
-                    else
-                    {
-                        tokenNum = lvId + 3; // Payload
-                    }
+                    if (cmd_type == "command")                    
+                        tokenNum = lvId; // Launch Vehicle                    
+                    else                    
+                        tokenNum = lvId + 3; // Payload                    
                     Task t;
                     t = Task.Run(() => seedData(task_num, messageBrokerPublisher, cmd_type, lvId, tokens[tokenNum]), tokens[tokenNum]);
                     task_num = t.Id;
@@ -113,14 +90,10 @@ namespace LaunchVehicle
                     break;
                 case "StopTelemetry":
                     int tokenNumb;
-                    if (cmd_type == "command")
-                    {
-                        tokenNumb = lvId;
-                    }
-                    else
-                    {
-                        tokenNumb = lvId + 3;
-                    }
+                    if (cmd_type == "command")                    
+                        tokenNumb = lvId;                    
+                    else                    
+                        tokenNumb = lvId + 3;                    
                     Console.WriteLine("Task cancellation requested.");
                     tokenSources[tokenNumb].Cancel();
                     break;
@@ -142,9 +115,8 @@ namespace LaunchVehicle
             Console.WriteLine("Waiting to Start Publishing Messages");
 
             do
-            {
-                // Keep program running
-                await Task.Delay(5000);
+            {                
+                await Task.Delay(5000); // Keep program running
             }
             while (true);
         }
@@ -165,8 +137,7 @@ namespace LaunchVehicle
         {
             if (ct.IsCancellationRequested)
             {
-                Console.WriteLine("Task {0} was cancelled before it got started.",
-                                  taskNum);
+                Console.WriteLine("Task {0} was cancelled before it got started.", taskNum);
                 ct.ThrowIfCancellationRequested();
             }
 
@@ -189,9 +160,7 @@ namespace LaunchVehicle
             var temperature = 340.0;
             var orbitRadius = -99.0;
             if (lvId < 4)
-            {
-                orbitRadius = Convert.ToDouble(settings["Orbit"]);
-            }
+                orbitRadius = Convert.ToDouble(settings["Orbit"]);            
             var timeToOrbit = orbitRadius / 3600 + 10;
             var alerted = false;
             //Console.WriteLine("Estimated time to reach orbit: " + timeToOrbit);
@@ -222,9 +191,7 @@ namespace LaunchVehicle
                     if (lvId < 4)
                     {
                         if (timeToOrbit > 0d)
-                        {
-                            timeToOrbit -= 1d;                                                  
-                        }
+                            timeToOrbit -= 1d;
                         else if (timeToOrbit <= 0d)
                         {
                             if (!alerted) // Send alert to DSN  
@@ -241,7 +208,6 @@ namespace LaunchVehicle
                     {
                         Console.WriteLine("Task {0} cancelled", taskNum);
                         break;
-                        //ct.ThrowIfCancellationRequested();
                     }
                 }
             }
@@ -271,24 +237,15 @@ namespace LaunchVehicle
         private static NameValueCollection GetConfiguration(int lvId, Dictionary<int, string> source)
         {
             string group;
-            if (lvId < 4)
-            {
-                group = "LaunchGroup";
-            }
-            else
-            {
+            if (lvId < 4)            
+                group = "LaunchGroup";            
+            else            
                 group = "PayloadGroup";
-            }
+            
             // Read a particular key from the config file 
             var settings = ConfigurationManager.GetSection(group + "/" + source[lvId] + "-Settings") as NameValueCollection;
 
-            foreach (var key in settings.AllKeys)
-            {
-                Console.WriteLine(key + " = " + settings[key]);
-            }
-
             return settings;
-
         }
         private static NameValueCollection TestConfiguration()
         {

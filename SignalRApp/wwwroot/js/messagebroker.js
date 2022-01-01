@@ -30,9 +30,6 @@ signalrConnection.on("onMessageReceived", function (eventMessage) {
     //console.log("Messages: " + messageCount.toString());
 
     for (const property in eventMessage) {
-
-        //console.log("property: " + property + " value: " + eventMessage[property]);
-
         if (property === "title") {
             console.log(eventMessage["title"]);
             var json = JSON.parse(eventMessage["title"]);
@@ -61,23 +58,20 @@ signalrConnection.on("onMessageReceived", function (eventMessage) {
                 var latitude = json["Latitude"];
                 var temperature = json["Temperature"];
                 var timeToOrbit = json["TimeToOrbit"];                
-
-                //document.getElementById("exampleModalLabel" + p + id).innerText = 
+ 
                 document.getElementById("tlmCount" + p + id).innerText = "Telemetry Received: " + count.toString();
-                document.getElementById("altitude" + p + id).innerText = altitude;
-                document.getElementById("longitude" + p + id).innerText = longitude;
-                document.getElementById("latitude" + p + id).innerText = latitude;
-                document.getElementById("temperature" + p + id).innerText = temperature;
+                document.getElementById("altitude" + p + id).innerText = (Math.round(altitude * 100) / 100).toFixed(2);
+                document.getElementById("longitude" + p + id).innerText = (Math.round(longitude * 100) / 100).toFixed(2);
+                document.getElementById("latitude" + p + id).innerText = (Math.round(latitude * 100) / 100).toFixed(2);
+                document.getElementById("temperature" + p + id).innerText = (Math.round(temperature * 100) / 100).toFixed(2);
                 if (type !== "payload_command") {
                     if (timeToOrbit < 0) {
                         timeToOrbit = 0;
                     }
-                    document.getElementById("time_to_orbit" + id).innerText = timeToOrbit;
-                    document.getElementById("tto" + id).innerText = timeToOrbit + " second(s)";
+                    document.getElementById("time_to_orbit" + id).innerText = (Math.round(timeToOrbit * 100) / 100).toFixed(2);
+                    document.getElementById("tto" + id).innerText = (Math.round(timeToOrbit * 100) / 100).toFixed(2) + " second(s)";
                 }
                 document.getElementById("time_formatted" + p + id).innerText = createdDateTime;
-
-/*                console.log("id: " + p + id);*/
             }          
 
         }    
@@ -107,7 +101,6 @@ $(document).ready(function () {
             $('#launch_target' + lvId).prop('disabled', false);
             $('#launch_cmd_btn').prop('disabled', false);
         }
-
     })
 
     // Sends launch command info
@@ -132,7 +125,6 @@ $(document).ready(function () {
         const cmd = $('#commandSelect').find(":selected").text();
         //console.log("Target: " + target + " Command: " + cmd);
 
-        //console.log(lVehicles);
         var lvId = lvDict[target];
         var launchStatus = lVehicles[lvId]["launchStatus"]
         var deployStatus = lVehicles[lvId]["deployStatus"];        

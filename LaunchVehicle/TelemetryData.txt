@@ -1,5 +1,0 @@
-﻿altitude: 400
-longitude: -45.34
-latitude: -28.34
-temperature: 340
-timeToOrbit: 45

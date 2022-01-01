@@ -68,16 +68,16 @@ signalrConnection.on("onMessageReceived", function (eventMessage) {
                 document.getElementById("longitude" + p + id).innerText = longitude;
                 document.getElementById("latitude" + p + id).innerText = latitude;
                 document.getElementById("temperature" + p + id).innerText = temperature;
-                document.getElementById("time_to_orbit" + p + id).innerText = timeToOrbit;
-                document.getElementById("tto" + p + id).innerText = timeToOrbit + " second(s)";
+                if (type !== "payload_command") {
+                    if (timeToOrbit < 0) {
+                        timeToOrbit = 0;
+                    }
+                    document.getElementById("time_to_orbit" + id).innerText = timeToOrbit;
+                    document.getElementById("tto" + id).innerText = timeToOrbit + " second(s)";
+                }
                 document.getElementById("time_formatted" + p + id).innerText = createdDateTime;
 
-                console.log("id: " + p + id);
-                //console.log("tto: " + timeToOrbit);
-
-                //if (timeToOrbit === 0) {
-                //    reachedOrbit(id)
-                //}
+/*                console.log("id: " + p + id);*/
             }          
 
         }    
@@ -99,9 +99,9 @@ $(document).ready(function () {
         var launchStatus = lVehicles[lvId]["launchStatus"];
         console.log("launch status: " + launchStatus);
 
-        if (launchStatus === "Launched") {
+        if (launchStatus === "Launched" || target === "Select") {
             console.log("launch form | disable " + target);
-            
+            $('#launch_cmd_btn').prop('disabled', true);            
             $('#launch_target' + lvId).prop('disabled', true);
         } else {
             $('#launch_target' + lvId).prop('disabled', false);
@@ -119,9 +119,11 @@ $(document).ready(function () {
             return console.error(err.toString());
         });
 
+        var lvId = lvDict[target];
         $('#launch_target_select').val('0');
-        
-        /*launch(lvDict[target]);*/
+        $('#launch_target0').prop('disabled', true);
+        $('#launch_target' + lvId).prop('disabled', true);
+        $('#launch_cmd_btn').prop('disabled', true);
     })
 
     // -------------------Command Center -------------------------------------------------
@@ -227,8 +229,6 @@ $(document).ready(function () {
             $('#alertBtn').hide();
         }
     })
-
-
 });
 
 function reachedOrbit(lvId, createdTime) {
@@ -261,6 +261,7 @@ function launch(lvId, createdTime) {
     var launchStatus = document.getElementById("status" + lvId);
     launchStatus.innerHTML = "Launched";
     launchStatus.className = "success";
+    console.log("test launch status: " + lVehicles[lvId]["launchStatus"]);
 
     var alertMessage = createdTime + "  |  " + lVehicles[lvId]["name"] + " has launched";
     alert(alertMessage);

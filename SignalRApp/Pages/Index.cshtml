@@ -176,7 +176,7 @@
                 <div class="col-auto">
                 <label  for="autoSizingSelect">Choose Target</label>
                 <select class="form-select" id="launch_target_select">
-                    <option selected disabled>Select</option>
+                    <option value="0" id="launch_target0" selected disabled>Select</option>
                     <option value="1" id="launch_target1">Bird-9</option>
                     <option value="2" id="launch_target2">Bird-Heavy</option>
                     <option value="3" id="launch_target3">Hawk-Heavy</option>
@@ -254,8 +254,8 @@
       <th scope="row">2</th>
       <td>Bird-Heavy</td>
       <td >
-          @*<span id="status2" class="not-launched">Upcoming</span>*@
-          <span id="status2" class="success">Launched</span>
+          <span id="status2" class="not-launched">Upcoming</span>
+          @*<span id="status2" class="success">Launched</span>*@
       </td>
       <td>
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal2" >View</button>
@@ -491,10 +491,6 @@
                   <td colspan="2" id="temperaturep1"></td>
                 </tr>
                 <tr>
-                  <th scope="row">Time to Orbit</th>
-                  <td colspan="2" id="time_to_orbitp1"></td>
-                </tr>
-                <tr>
                   <th scope="row">Time Formatted</th>
                   <td colspan="2" id="time_formattedp1"></td>
                 </tr>                
@@ -544,10 +540,6 @@
                   <td colspan="2" id="temperaturep2"></td>
                 </tr>
                 <tr>
-                  <th scope="row">Time to Orbit</th>
-                  <td colspan="2" id="time_to_orbitp2"></td>
-                </tr>
-                <tr>
                   <th scope="row">Time Formatted</th>
                   <td colspan="2" id="time_formattedp2"></td>
                 </tr>
@@ -595,10 +587,6 @@
                 <tr>
                   <th scope="row">Temperature</th>
                   <td colspan="2" id="temperaturep3"></td>
-                </tr>
-                <tr>
-                  <th scope="row">Time to Orbit</th>
-                  <td colspan="2" id="time_to_orbitp3"></td>
                 </tr>
                 <tr>
                   <th scope="row">Time Formatted</th>

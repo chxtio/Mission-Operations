@@ -1,5 +1,8 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using System;
+using System.Configuration;
+using static System.Configuration.ConfigurationManager;
+using System.Collections.Specialized;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.IO;
@@ -14,6 +17,12 @@ namespace LaunchVehicle
     {
         static async Task Main()
         {
+            //var settings = TestConfiguration();
+            //foreach (var key in settings.AllKeys)
+            //{
+            //    Console.WriteLine(key + " = " + settings[key]);
+            //}
+
             var messageBrokerType = MessageBrokerType.RabbitMq;
             // Create subscriber and publisher based on message broker type
             var subscriber = MessageBrokerSubscriberFactory.Create(messageBrokerType);
@@ -23,7 +32,7 @@ namespace LaunchVehicle
             lvDict.Add("Bird-9", 1);
             lvDict.Add("Bird-Heavy", 2);
             lvDict.Add("Hawk-Heavy", 3);
-            var lvId = 0;
+            var lvId = 0;            
 
             var cmd_target = "";
             var cmd_type = "";
@@ -79,6 +88,7 @@ namespace LaunchVehicle
                     //process.StartInfo.FileName = @"C:\Program Files\Notepad++\notepad++.exe"; //"D:\OneDrive\Projects\csharp\Deep-Space-Network\LaunchVehicle\bin\Debug\net6.0\LaunchVehicle.exe";
                     //process.Start();
                     //process.WaitForExit();
+
                     var testSeed = RunProcessAsync(@"D:\OneDrive\Projects\csharp\Deep-Space-Network\Seeder\bin\Debug\net6.0\Seeder.exe");
                     // Alert DSN about launch
                     updateStatus(cmd_type, lvId, "Launch", messageBrokerPublisher);
@@ -160,6 +170,16 @@ namespace LaunchVehicle
                 ct.ThrowIfCancellationRequested();
             }
 
+            Dictionary<int, string> TLmSource = new Dictionary<int, string>(6);
+            TLmSource.Add(1, "Bird-9");
+            TLmSource.Add(2, "Bird-Heavy");
+            TLmSource.Add(3, "Hawk-Heavy");
+            TLmSource.Add(4, "GPM");
+            TLmSource.Add(5, "TDRS-11");
+            TLmSource.Add(6, "RO-245");
+
+            var settings = GetConfiguration(lvId, TLmSource);
+
             Random random = new Random();
             int count;
             var maxIterations = 500;
@@ -167,7 +187,11 @@ namespace LaunchVehicle
             var longitude = -45.34;
             var latitude = -25.34;
             var temperature = 340.0;
-            var orbitRadius = 36000.0;
+            var orbitRadius = -99.0;
+            if (lvId < 4)
+            {
+                orbitRadius = Convert.ToDouble(settings["Orbit"]);
+            }
             var timeToOrbit = orbitRadius / 3600 + 10;
             var alerted = false;
             //Console.WriteLine("Estimated time to reach orbit: " + timeToOrbit);
@@ -195,20 +219,23 @@ namespace LaunchVehicle
                     longitude -= 10d + random.NextDouble(); ;
                     latitude -= 10d - random.NextDouble(); ;
                     temperature -= random.NextDouble();
-                    if (timeToOrbit > 0d)
+                    if (lvId < 4)
                     {
-                        timeToOrbit -= 1d;
-                        // Send alert to DSN                        
-                    } else if (timeToOrbit == 0d)
-                    {                        
-                        if (!alerted)
+                        if (timeToOrbit > 0d)
                         {
-                            Console.WriteLine("Sending reached orbit alert");
-                            updateStatus("Reached Orbit Alert", lvId, "Reached Orbit Alert", messageBrokerPublisher);
-                            alerted = true;
+                            timeToOrbit -= 1d;                                                  
                         }
-                        
+                        else if (timeToOrbit <= 0d)
+                        {
+                            if (!alerted) // Send alert to DSN  
+                            {
+                                Console.WriteLine("Sending reached orbit alert");
+                                updateStatus("Reached Orbit Alert", lvId, "Reached Orbit Alert", messageBrokerPublisher);
+                                alerted = true;
+                            }
+                        }
                     }
+
 
                     if (ct.IsCancellationRequested)
                     {
@@ -241,6 +268,67 @@ namespace LaunchVehicle
             return tcs.Task;
         }
 
+        private static NameValueCollection GetConfiguration(int lvId, Dictionary<int, string> source)
+        {
+            string group;
+            if (lvId < 4)
+            {
+                group = "LaunchGroup";
+            }
+            else
+            {
+                group = "PayloadGroup";
+            }
+            // Read a particular key from the config file 
+            var settings = ConfigurationManager.GetSection(group + "/" + source[lvId] + "-Settings") as NameValueCollection;
+
+            foreach (var key in settings.AllKeys)
+            {
+                Console.WriteLine(key + " = " + settings[key]);
+            }
+
+            return settings;
+
+        }
+        private static NameValueCollection TestConfiguration()
+        {
+            ////// Read a particular key from the config file 
+            var Bird9Settings = ConfigurationManager.GetSection("LaunchGroup/Bird-9-Settings") as NameValueCollection;
+            var BirdHeavySettings = ConfigurationManager.GetSection("LaunchGroup/Bird-Heavy-Settings") as NameValueCollection;
+            var HawkHeavySettings = ConfigurationManager.GetSection("LaunchGroup/Hawk-Heavy-Settings") as NameValueCollection;
+            var GPMSettings = ConfigurationManager.GetSection("PayloadGroup/GPM-Settings") as NameValueCollection;
+            var TDRS11Settings = ConfigurationManager.GetSection("PayloadGroup/TDRS-11-Settings") as NameValueCollection;
+            var RO245Settings = ConfigurationManager.GetSection("PayloadGroup/RO-245-Settings") as NameValueCollection;
+
+
+            //Console.WriteLine(Bird9Settings["Orbit"]);
+            return BirdHeavySettings;
+
+            //foreach (var key in Bird9Settings.AllKeys)
+            //{
+            //    Console.WriteLine(key + " = " + Bird9Settings[key]);
+            //}
+            //foreach (var key in BirdHeavySettings.AllKeys)
+            //{
+            //    Console.WriteLine(key + " = " + BirdHeavySettings[key]);
+            //}
+            //foreach (var key in HawkHeavySettings.AllKeys)
+            //{
+            //    Console.WriteLine(key + " = " + HawkHeavySettings[key]);
+            //}
+            //foreach (var key in GPMSettings.AllKeys)
+            //{
+            //    Console.WriteLine(key + " = " + GPMSettings[key]);
+            //}
+            //foreach (var key in TDRS11Settings.AllKeys)
+            //{
+            //    Console.WriteLine(key + " = " + TDRS11Settings[key]);
+            //}
+            //foreach (var key in RO245Settings.AllKeys)
+            //{
+            //    Console.WriteLine(key + " = " + RO245Settings[key]);
+            //}
+        }
         private static IEnumerable<string> GetTitles(string filename)
         {
             var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);

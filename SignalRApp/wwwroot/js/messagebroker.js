@@ -68,16 +68,13 @@ signalrConnection.on("onMessageReceived", function (eventMessage) {
                     if (timeToOrbit < 0) {
                         timeToOrbit = 0;
                     }
-                    document.getElementById("time_to_orbit" + id).innerText = (Math.round(timeToOrbit * 100) / 100).toFixed(2);
-                    document.getElementById("tto" + id).innerText = (Math.round(timeToOrbit * 100) / 100).toFixed(2) + " second(s)";
+                    document.getElementById("time_to_orbit" + id).innerText = (Math.round(timeToOrbit * 100) / 100).toFixed(0);
+                    document.getElementById("tto" + id).innerText = (Math.round(timeToOrbit * 100) / 100).toFixed(0) + " second(s)";
                 }
                 document.getElementById("time_formatted" + p + id).innerText = createdDateTime;
-            }          
-
-        }    
-
+            }
+        }
     }
-
 });
 
 

@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ConfigFiles\**" />
+    <EmbeddedResource Remove="ConfigFiles\**" />
+    <None Remove="ConfigFiles\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Bird9 - Copy.config" />
     <None Remove="Bird9.config" />
     <None Remove="Payload.config" />
@@ -18,10 +24,6 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="RabbitMQ.Client" Version="6.2.2" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="ConfigFiles\" />
   </ItemGroup>
 
 </Project>

@@ -5,8 +5,7 @@
         static void Main(string[] args)
         {
             // See https://aka.ms/new-console-template for more information
-            Console.WriteLine("Hello World! We have a Lift-off!!");
-
+            Console.WriteLine("We have a Lift-off! " + args[0] + " launched successfully (Orbit: " + args[1] + " km)" );
         }
     }
 }

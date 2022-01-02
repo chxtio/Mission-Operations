@@ -10,11 +10,15 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace LaunchVehicle
 {
     internal static class Program
     {
+        static readonly HttpClient client = new HttpClient();
         static async Task Main()
         {
             //var settings = GetConfiguration(4);
@@ -70,11 +74,9 @@ namespace LaunchVehicle
             switch (command)
             {
                 case "Launch":
-                    //Console.WriteLine("Launching vehicle: " + cmd_target);
-                    var testLaunch = RunProcessAsync(@"..\..\..\..\Seeder\bin\Debug\net6.0\Seeder.exe", lvId);
-                    // Alert DSN about launch
-                    updateStatus(cmd_type, lvId, "Launch", messageBrokerPublisher);                    
-                    break;
+                    var testLaunch = RunProcessAsync(@"..\..\..\..\Seeder\bin\Debug\net6.0\Seeder.exe", lvId);                    
+                    updateStatus(cmd_type, lvId, "Launch", messageBrokerPublisher); // Alert DSN about launch                   
+                        break;
 
                 case "StartTelemetry":
                     int tokenNum = lvId < 4 ? lvId : lvId + 3;                                    
@@ -103,6 +105,12 @@ namespace LaunchVehicle
                     Console.WriteLine("Target {0} | Task {1} executing", cmd_target, t.Id);
                     tasks.Add(t);
                     await Task.Delay(1000);
+                    break;
+
+                case "StopData":
+                    int token_numb = lvId + 6;
+                    Console.WriteLine("Task cancellation requested.");
+                    tokenSources[token_numb].Cancel();
                     break;
 
                 default:
@@ -187,6 +195,15 @@ namespace LaunchVehicle
             //Console.WriteLine($"{messageId}: {eventMessageJson}\n");
         }
 
+        private static double UpdateMeasurement()
+        {
+            Random random = new Random();
+            var dir = random.NextDouble() > .5;
+            var change = dir ? random.NextDouble() : -random.NextDouble();
+
+            return change;
+        }
+
         private static void seedTlm(int taskNum, PublisherBase messageBrokerPublisher, string cmd_type, int lvId, CancellationToken ct)
         {
             int id = lvId < 4 ? lvId : lvId + 3;
@@ -217,10 +234,10 @@ namespace LaunchVehicle
                     Thread.Sleep(1000);
                     // Update with random values
                     messageId = Guid.NewGuid().ToString("N");
-                    altitude += random.NextDouble();
-                    longitude -= 10d + random.NextDouble(); ;
-                    latitude -= 10d - random.NextDouble(); ;
-                    temperature -= random.NextDouble();
+                    altitude += 10d + random.NextDouble();
+                    longitude -= 10d + random.NextDouble(); 
+                    latitude -= 10d - random.NextDouble();
+                    temperature += UpdateMeasurement();
 
                     if (lvId < 4)
                     {
@@ -248,10 +265,8 @@ namespace LaunchVehicle
 
         private static void seedData(int taskNum, PublisherBase messageBrokerPublisher, int lvId, CancellationToken ct)
         {
-            Console.WriteLine("seed data");
             var settings = GetConfiguration(lvId + 3);
             var type = settings["Type"];
-            Console.WriteLine("Type: " + type);
 
             switch (type)
             {
@@ -273,30 +288,29 @@ namespace LaunchVehicle
         {
             var maxIterations = 500;
             Random random = new Random();
+            var type = settings["Type"];
+            var messageId = Guid.NewGuid().ToString("N");
             var interval = Int32.Parse(settings["Data-interval"]) * 1000;
             var rainfall = 34.0;
             var humidity = 56.0;
             var snow = 3.0;
-            Console.WriteLine("interval: " + interval);
+            //Console.WriteLine("interval: " + interval);
 
             while (!ct.IsCancellationRequested)
             {
                 for (int i = 0; i <= maxIterations; i++)
-                {
-                    Console.WriteLine(i);
-                    var messageId = Guid.NewGuid().ToString("N");
+                {                   
                     var time = DateTime.UtcNow;
-                    var scidata = new SciData(messageId, rainfall, humidity, snow, time);
+                    var scidata = new SciData(type, messageId, lvId, rainfall, humidity, snow, time);
                     var json = JsonSerializer.Serialize(scidata);
                     Publish(messageId, json, time, messageBrokerPublisher);
 
                     Thread.Sleep(interval);
                     // Update with random values
                     messageId = Guid.NewGuid().ToString("N");
-                    //altitude += random.NextDouble();
-                    //longitude -= 10d + random.NextDouble(); ;
-                    //latitude -= 10d - random.NextDouble(); ;
-                    //temperature -= random.NextDouble();
+                    rainfall += UpdateMeasurement();
+                    humidity += UpdateMeasurement();
+                    snow += UpdateMeasurement();
 
                     if (ct.IsCancellationRequested)
                     {
@@ -306,34 +320,35 @@ namespace LaunchVehicle
                 }
             }
         }
+
+
         private static void SimulateCommData(int taskNum, PublisherBase messageBrokerPublisher, int lvId, CancellationToken ct, NameValueCollection settings)
         {
             var maxIterations = 500;
             Random random = new Random();
+            var messageId = Guid.NewGuid().ToString("N");
+            var type = settings["Type"];
             var interval = Int32.Parse(settings["Data-interval"]) * 1000;
             var uplink = 40.0;
             var downlink = 6700.0;
             var activeTransponders = 65.0;
-            Console.WriteLine("interval: " + interval);
+            //Console.WriteLine("interval: " + interval);
 
             while (!ct.IsCancellationRequested)
             {
                 for (int i = 0; i <= maxIterations; i++)
                 {
-                    Console.WriteLine(i);
-                    var messageId = Guid.NewGuid().ToString("N");
                     var time = DateTime.UtcNow;
-                    var commdata = new CommData(messageId, uplink, downlink, activeTransponders, time);
+                    var commdata = new CommData(type, messageId, lvId, uplink, downlink, activeTransponders, time);
                     var json = JsonSerializer.Serialize(commdata);
                     Publish(messageId, json, time, messageBrokerPublisher);
 
                     Thread.Sleep(interval);
                     // Update with random values
                     messageId = Guid.NewGuid().ToString("N");
-                    //altitude += random.NextDouble();
-                    //longitude -= 10d + random.NextDouble(); ;
-                    //latitude -= 10d - random.NextDouble(); ;
-                    //temperature -= random.NextDouble();
+                    uplink += UpdateMeasurement();
+                    downlink += UpdateMeasurement();
+                    activeTransponders += UpdateMeasurement();
 
                     if (ct.IsCancellationRequested)
                     {
@@ -344,32 +359,53 @@ namespace LaunchVehicle
             }
         }
 
-        private static void SimulateSpyData(int taskNum, PublisherBase messageBrokerPublisher, int lvId, CancellationToken ct, NameValueCollection settings)
+        static async Task<String> GetRandomPhotoAsync()
+        {
+            var imgurl = "";
+            Random rand = new Random();
+            // Call asynchronous network methods in a try/catch block to handle exceptions.
+            try
+            {
+                var uri = "https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=1000&api_key=DEMO_KEY";
+                var responseBody = await client.GetStringAsync(uri);
+                dynamic obj = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(responseBody);
+                
+                var randNum = rand.Next(100);
+                imgurl = Convert.ToString(obj.photos[randNum]["img_src"]);
+                Console.WriteLine(imgurl);
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine("\nException Caught!");
+                Console.WriteLine("Message :{0} ", e.Message);
+            }
+
+            return imgurl;
+        }
+
+        private static async void SimulateSpyData(int taskNum, PublisherBase messageBrokerPublisher, int lvId, CancellationToken ct, NameValueCollection settings)
         {
             var maxIterations = 500;
             Random random = new Random();
+            var messageId = Guid.NewGuid().ToString("N");
+            var type = settings["Type"];
             var interval = Int32.Parse(settings["Data-interval"]) * 1000;
-            var imgUrl = "https://mars.nasa.gov/msl-raw-images/proj/msl/redops/ods/surface/sol/01000/opgs/edr/rcam/RLB_486265291EDR_F0481570RHAZ00323M_.JPG";
-            Console.WriteLine("interval: " + interval);
+            var imgUrl = await GetRandomPhotoAsync();//"https://mars.nasa.gov/msl-raw-images/proj/msl/redops/ods/surface/sol/01000/opgs/edr/rcam/RLB_486265291EDR_F0481570RHAZ00323M_.JPG";
+            //Console.WriteLine("interval: " + interval);
 
             while (!ct.IsCancellationRequested)
             {
                 for (int i = 0; i <= maxIterations; i++)
                 {
-                    Console.WriteLine(i);
-                    var messageId = Guid.NewGuid().ToString("N");
                     var time = DateTime.UtcNow;
-                    var spydata = new SpyData(messageId, imgUrl, time);
+                    var spydata = new SpyData(type, messageId, lvId, imgUrl, time);
                     var json = JsonSerializer.Serialize(spydata);
                     Publish(messageId, json, time, messageBrokerPublisher);
 
                     Thread.Sleep(interval);
                     // Update with random values
                     messageId = Guid.NewGuid().ToString("N");
-                    //altitude += random.NextDouble();
-                    //longitude -= 10d + random.NextDouble(); ;
-                    //latitude -= 10d - random.NextDouble(); ;
-                    //temperature -= random.NextDouble();
+                    imgUrl = await GetRandomPhotoAsync();
 
                     if (ct.IsCancellationRequested)
                     {
@@ -378,19 +414,6 @@ namespace LaunchVehicle
                     }
                 }
             }
-        }
-
-        private static IEnumerable<string> GetTitles(string filename)
-        {
-            var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
-            using var streamReader = new StreamReader(fileStream);
-
-            string line = null;
-            // Stream lines, only maintaining one line in memory at a time
-            while ((line = streamReader.ReadLine()) != null)
-            {
-                yield return line;
-            }
-        }
+        }        
     }
 }

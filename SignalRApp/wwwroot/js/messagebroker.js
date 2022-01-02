@@ -36,7 +36,8 @@ signalrConnection.on("onMessageReceived", function (eventMessage) {
             var type = json["Type"];
             var id = json["LvId"];
             var createdDateTime = json["CreatedDateTime"];
-            var p = "";
+            var payload_types = ["payload_command", "Scientific", "Communication", "Spy"];
+            var p = payload_types.includes(type) ? "p" : ""; 
             console.log("type: " + type);
 
             if (type === "launch_command") {
@@ -46,12 +47,32 @@ signalrConnection.on("onMessageReceived", function (eventMessage) {
             } else if (type === "Reached Orbit Alert") {
                 console.log("Reached Orbit Alert");
                 reachedOrbit(id, createdDateTime);
+            } else if (type === "Scientific") {
+                var rainfall = json["Rainfall"];
+                var humidity = json["Humidity"];
+                var snow = json["Snow"];
+
+                document.getElementById("rainfall" + p + id).innerText = (Math.round(rainfall * 100) / 100).toFixed(2) + " mm";
+                document.getElementById("humidity" + p + id).innerText = (Math.round(humidity * 100) / 100).toFixed(2) + " %";
+                document.getElementById("snow" + p + id).innerText = (Math.round(snow * 100) / 100).toFixed(2) + " in";
+                document.getElementById("data_time_formatted" + p + id).innerText = document.getElementById("time_formatted" + p + id).innerText;
+            } else if (type === "Communication") {
+                var uplink = json["Uplink"];
+                var downlink = json["Downlink"];
+                var activetransponders= json["ActiveTransponders"];
+
+                document.getElementById("uplink" + p + id).innerText = (Math.round(uplink * 100) / 100).toFixed(2) + " MBps";
+                document.getElementById("downlink" + p + id).innerText = (Math.round(downlink * 100) / 100).toFixed(2) + " MBps";
+                document.getElementById("activetransponders" + p + id).innerText = (Math.round(activetransponders * 100) / 100).toFixed(2);
+                document.getElementById("data_time_formatted" + p + id).innerText = document.getElementById("time_formatted" + p + id).innerText;
+            } else if (type === "Spy") {
+                var imgurl = json["ImgUrl"];
+
+                console.log("attempt to set image: " + imgurl);
+                document.getElementById("imagep3").src = imgurl;
+                document.getElementById("data_time_formatted" + p + id).innerText = document.getElementById("time_formatted" + p + id).innerText;
             }
             else {
-                if (type == "payload_command") {
-                    p = "p";
-                }
-
                 var count = json["Count"];
                 var altitude = json["Altitude"];
                 var longitude = json["Longitude"];
@@ -64,7 +85,7 @@ signalrConnection.on("onMessageReceived", function (eventMessage) {
                 document.getElementById("longitude" + p + id).innerText = (Math.round(longitude * 100) / 100).toFixed(2);
                 document.getElementById("latitude" + p + id).innerText = (Math.round(latitude * 100) / 100).toFixed(2);
                 document.getElementById("temperature" + p + id).innerText = (Math.round(temperature * 100) / 100).toFixed(2);
-                if (type !== "payload_command") {
+                if (type === "command") {
                     if (timeToOrbit < 0) {
                         timeToOrbit = 0;
                     }

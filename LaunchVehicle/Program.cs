@@ -21,12 +21,6 @@ namespace LaunchVehicle
         static readonly HttpClient client = new HttpClient();
         static async Task Main()
         {
-            //var settings = GetConfiguration(4);
-            //foreach (var key in settings.AllKeys)
-            //{
-            //    Console.WriteLine(key + " = " + settings[key]);
-            //}   
-
             // Create subscriber and publisher based on message broker type
             var messageBrokerType = MessageBrokerType.RabbitMq;
             var subscriber = MessageBrokerSubscriberFactory.Create(messageBrokerType);
@@ -113,6 +107,14 @@ namespace LaunchVehicle
                     tokenSources[token_numb].Cancel();
                     break;
 
+                case "Decommission":
+                    //To do
+                    break;
+
+                case "Deorbit":
+                    //To do
+                    break;
+
                 default:
                     Console.WriteLine("Command not recognized: " + command);
                     break;
@@ -132,6 +134,29 @@ namespace LaunchVehicle
                 await Task.Delay(5000); // Keep program running
             }
             while (true);
+        }
+        static async Task<String> GetNasaPhotoAsync()
+        {
+            var imgurl = "";
+            Random rand = new Random();
+            // Call asynchronous network methods in a try/catch block to handle exceptions.
+            try
+            {
+                var uri = "https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=1000&api_key=DEMO_KEY";
+                var responseBody = await client.GetStringAsync(uri);
+                dynamic obj = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(responseBody);
+
+                var randNum = rand.Next(100);
+                imgurl = Convert.ToString(obj.photos[randNum]["img_src"]);
+                Console.WriteLine(imgurl);
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine("\nException Caught!");
+                Console.WriteLine("Message :{0} ", e.Message);
+            }
+
+            return imgurl;
         }
 
         // Update launch status
@@ -332,7 +357,6 @@ namespace LaunchVehicle
             var uplink = 40.0;
             var downlink = 6700.0;
             var activeTransponders = 65.0;
-            //Console.WriteLine("interval: " + interval);
 
             while (!ct.IsCancellationRequested)
             {
@@ -359,30 +383,6 @@ namespace LaunchVehicle
             }
         }
 
-        static async Task<String> GetRandomPhotoAsync()
-        {
-            var imgurl = "";
-            Random rand = new Random();
-            // Call asynchronous network methods in a try/catch block to handle exceptions.
-            try
-            {
-                var uri = "https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=1000&api_key=DEMO_KEY";
-                var responseBody = await client.GetStringAsync(uri);
-                dynamic obj = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(responseBody);
-                
-                var randNum = rand.Next(100);
-                imgurl = Convert.ToString(obj.photos[randNum]["img_src"]);
-                Console.WriteLine(imgurl);
-            }
-            catch (HttpRequestException e)
-            {
-                Console.WriteLine("\nException Caught!");
-                Console.WriteLine("Message :{0} ", e.Message);
-            }
-
-            return imgurl;
-        }
-
         private static async void SimulateSpyData(int taskNum, PublisherBase messageBrokerPublisher, int lvId, CancellationToken ct, NameValueCollection settings)
         {
             var maxIterations = 500;
@@ -390,7 +390,7 @@ namespace LaunchVehicle
             var messageId = Guid.NewGuid().ToString("N");
             var type = settings["Type"];
             var interval = Int32.Parse(settings["Data-interval"]) * 1000;
-            var imgUrl = await GetRandomPhotoAsync();//"https://mars.nasa.gov/msl-raw-images/proj/msl/redops/ods/surface/sol/01000/opgs/edr/rcam/RLB_486265291EDR_F0481570RHAZ00323M_.JPG";
+            var imgUrl = await GetNasaPhotoAsync();//"https://mars.nasa.gov/msl-raw-images/proj/msl/redops/ods/surface/sol/01000/opgs/edr/rcam/RLB_486265291EDR_F0481570RHAZ00323M_.JPG";
             //Console.WriteLine("interval: " + interval);
 
             while (!ct.IsCancellationRequested)
@@ -405,7 +405,7 @@ namespace LaunchVehicle
                     Thread.Sleep(interval);
                     // Update with random values
                     messageId = Guid.NewGuid().ToString("N");
-                    imgUrl = await GetRandomPhotoAsync();
+                    imgUrl = await GetNasaPhotoAsync();
 
                     if (ct.IsCancellationRequested)
                     {

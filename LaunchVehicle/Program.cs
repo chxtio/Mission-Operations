@@ -17,20 +17,11 @@ namespace LaunchVehicle
     {
         static async Task Main()
         {
-            //var settings = TestConfiguration();
+            //var settings = GetConfiguration(4);
             //foreach (var key in settings.AllKeys)
             //{
             //    Console.WriteLine(key + " = " + settings[key]);
-            //}
-
-            Dictionary<int, string> TLmSource = new Dictionary<int, string>(6);
-            TLmSource.Add(1, "Bird-9");
-            TLmSource.Add(2, "Bird-Heavy");
-            TLmSource.Add(3, "Hawk-Heavy");
-            TLmSource.Add(4, "GPM");
-            TLmSource.Add(5, "TDRS-11");
-            TLmSource.Add(6, "RO-245");
-
+            //}   
 
             // Create subscriber and publisher based on message broker type
             var messageBrokerType = MessageBrokerType.RabbitMq;
@@ -106,12 +97,12 @@ namespace LaunchVehicle
                     break;
 
                 case "StartData":
-                    //int token_num = lvId + 6;
-                    //t = Task.Run(() => seedData(task_num, messageBrokerPublisher, lvId, tokens[token_num]), tokens[token_num]);
-                    //task_num = t.Id;
-                    //Console.WriteLine("Target {0} | Task {1} executing", cmd_target, t.Id);
-                    //tasks.Add(t);
-                    //await Task.Delay(1000);
+                    int token_num = lvId + 6;
+                    t = Task.Run(() => seedData(task_num, messageBrokerPublisher, lvId, tokens[token_num]), tokens[token_num]);
+                    task_num = t.Id;
+                    Console.WriteLine("Target {0} | Task {1} executing", cmd_target, t.Id);
+                    tasks.Add(t);
+                    await Task.Delay(1000);
                     break;
 
                 default:
@@ -135,22 +126,71 @@ namespace LaunchVehicle
             while (true);
         }
 
+        // Update launch status
         private static void updateStatus(string cmd_type, int lvId, string update, PublisherBase messageBrokerPublisher)
         {
             var messageId = Guid.NewGuid().ToString("N");
-            var teleMessage = new StatusMessage(cmd_type, messageId, lvId, "Launched", DateTime.UtcNow);
+            var time = DateTime.UtcNow;
+            var teleMessage = new StatusMessage(cmd_type, messageId, lvId, "Launched", time);
             var json = JsonSerializer.Serialize(teleMessage);
-            var eventMessage = new EventMessage(messageId, json, DateTime.UtcNow);
+            Publish(messageId, json, time, messageBrokerPublisher);         
+        }
+
+        // Start executable with command line arguments
+        private static Task<int> RunProcessAsync(string fileName, int lvId)
+        {
+            var config = GetConfiguration(lvId);
+            var launchVehicle = config["Name"];
+            var orbit = config["Orbit"];
+            var tcs = new TaskCompletionSource<int>();
+
+            var process = new Process
+            {
+                StartInfo = { FileName = fileName, Arguments = $"{launchVehicle} {orbit}" },
+                EnableRaisingEvents = true
+            };
+
+            process.Exited += (sender, args) =>
+            {
+                tcs.SetResult(process.ExitCode);
+                process.Dispose();
+            };
+
+            process.Start();
+
+            return tcs.Task;
+        }
+
+        private static NameValueCollection GetConfiguration(int id)
+        {
+            Dictionary<int, string> source = new Dictionary<int, string>(6);
+            source.Add(1, "Bird-9");
+            source.Add(2, "Bird-Heavy");
+            source.Add(3, "Hawk-Heavy");
+            source.Add(4, "GPM");
+            source.Add(5, "TDRS-11");
+            source.Add(6, "RO-245");
+
+            string group = id < 4 ? "LaunchGroup" : "PayloadGroup";
+            var settings = ConfigurationManager.GetSection(group + "/" + source[id] + "-Settings") as NameValueCollection;
+
+            return settings;
+        }
+
+        private static void Publish(string messageId, string jsonMsg, DateTime time, PublisherBase messageBrokerPublisher)
+        {
+            var eventMessage = new EventMessage(messageId, jsonMsg, time);
             var eventMessageJson = JsonSerializer.Serialize(eventMessage); // Serialize message to Json
             var messageBytes = Encoding.UTF8.GetBytes(eventMessageJson);
             var message = new Message(messageBytes, messageId, "application/json"); // Adapter design pattern
-            messageBrokerPublisher.Publish(message);            
+            messageBrokerPublisher.Publish(message);
+            //Console.WriteLine($"{messageId}: {eventMessageJson}\n");
         }
 
         private static void seedTlm(int taskNum, PublisherBase messageBrokerPublisher, string cmd_type, int lvId, CancellationToken ct)
         {
             int id = lvId < 4 ? lvId : lvId + 3;
-            var settings = GetConfiguration(lvId);
+            var settings = GetConfiguration(id);
 
             Random random = new Random();
             int count;
@@ -160,23 +200,19 @@ namespace LaunchVehicle
             var longitude = -45.34;
             var latitude = -25.34;
             var temperature = 340.0;
-            var orbitRadius = id < 4 ? Convert.ToDouble(settings["Orbit"]) : -99.0;             
-            var timeToOrbit = orbitRadius / 3600 + 10;            
+            var orbitRadius = id < 4 ? Convert.ToDouble(settings["Orbit"]) : -99.0;
+            var timeToOrbit = orbitRadius / 3600 + 10;
+            var messageId = Guid.NewGuid().ToString("N");
 
             while (!ct.IsCancellationRequested)
             {
                 for (int i = 0; i <= maxIterations; i++)
                 {
+                    var time = DateTime.UtcNow;
                     count = i + 1;
-                    var messageId = Guid.NewGuid().ToString("N");
-                    var teleMessage = new TeleMessage(cmd_type, messageId, lvId, count, altitude, longitude, latitude, temperature, timeToOrbit, DateTime.UtcNow);
+                    var teleMessage = new TeleMessage(cmd_type, messageId, lvId, count, altitude, longitude, latitude, temperature, timeToOrbit, time);
                     var json = JsonSerializer.Serialize(teleMessage);
-                    var eventMessage = new EventMessage(messageId, json, DateTime.UtcNow);
-                    var eventMessageJson = JsonSerializer.Serialize(eventMessage); // Serialize message to Json
-                    var messageBytes = Encoding.UTF8.GetBytes(eventMessageJson);
-                    var message = new Message(messageBytes, messageId, "application/json"); // Adapter design pattern
-                    messageBrokerPublisher.Publish(message);
-                    //Console.WriteLine($"{messageId}: {eventMessageJson}\n");
+                    Publish(messageId, json, time, messageBrokerPublisher);
 
                     Thread.Sleep(1000);
                     // Update with random values
@@ -210,216 +246,138 @@ namespace LaunchVehicle
             }
         }
 
-        //private static void seedData(int taskNum, PublisherBase messageBrokerPublisher,int lvId, CancellationToken ct)
-        //{
-        //    if (ct.IsCancellationRequested)
-        //    {
-        //        Console.WriteLine("Task {0} was cancelled before it got started.", taskNum);
-        //        ct.ThrowIfCancellationRequested();
-        //    }
-
-        //    Dictionary<int, string> TLmSource = new Dictionary<int, string>(6);
-        //    TLmSource.Add(1, "Bird-9");
-        //    TLmSource.Add(2, "Bird-Heavy");
-        //    TLmSource.Add(3, "Hawk-Heavy");
-        //    TLmSource.Add(4, "GPM");
-        //    TLmSource.Add(5, "TDRS-11");
-        //    TLmSource.Add(6, "RO-245");
-
-        //    var maxIterations = 500;
-        //    var settings = GetConfiguration(lvId, TLmSource);
-
-        //    Random random = new Random();
-        //    var interval = Convert.ToDouble(settings["data-interval"]) * 1000;
-        //    var type = settings["type"];
-        //    var messageId = Guid.NewGuid().ToString("N");
-
-        //    while (!ct.IsCancellationRequested)
-        //    {
-        //        for (int i = 0; i <= maxIterations; i++)
-        //        {
-        //            switch (type)
-        //            {
-        //                case "Scientific":
-        //                    SimulateScienceData();
-
-        //                    var rainfall = 34.0;
-        //                    var humidity = 56.0;
-        //                    var snow = 3.0;
-        //                    var time = DateTime.UtcNow;
-        //                    var scidata = new SciData(messageId, rainfall, humidity, snow, time);
-        //                    var json = JsonSerializer.Serialize(messageID, scidata, DateTime.UtcNow);
-        //                    Publish(messageId, json, time, messageBrokerPublisher);
-
-        //                    break;
-
-        //                case "Communication":
-        //                    var messageId = Guid.NewGuid().ToString("N");
-        //                    var uplink = 40.0;
-        //                    var downlink = 6700.0;
-        //                    var activetransponders = 65.0;
-        //                    var commdata = new CommData(messageId, uplink, downlink, activetransponders, DateTime.UtcNow);
-        //                    json = JsonSerializer.Serialize(commdata);
-        //                    eventMessage = new EventMessage(messageId, json, DateTime.UtcNow);
-        //                    eventMessageJson = JsonSerializer.Serialize(eventMessage); // Serialize message to Json
-        //                    messageBytes = Encoding.UTF8.GetBytes(eventMessageJson);
-        //                    message = new Message(messageBytes, messageId, "application/json"); // Adapter design pattern
-        //                    messageBrokerPublisher.Publish(message);
-        //                    //Console.WriteLine($"{messageId}: {eventMessageJson}\n");
-        //                    break;
-
-
-        //                case "Spy":
-        //                    var messageId = Guid.NewGuid().ToString("N");
-        //                    var imgurl = "google.com";
-        //                    var spydata = new SpyData(messageId, imgurl, DateTime.UtcNow);
-        //                    json = JsonSerializer.Serialize(spydata);
-        //                    eventMessage = new EventMessage(messageId, json, DateTime.UtcNow);
-        //                    eventMessageJson = JsonSerializer.Serialize(eventMessage); // Serialize message to Json
-        //                    messageBytes = Encoding.UTF8.GetBytes(eventMessageJson);
-        //                    message = new Message(messageBytes, messageId, "application/json"); // Adapter design pattern
-        //                    messageBrokerPublisher.Publish(message);
-        //                    //Console.WriteLine($"{messageId}: {eventMessageJson}\n");
-        //                    break;
-        //            }
-
-
-
-
-        //            var messageId = Guid.NewGuid().ToString("N");
-        //            var teleMessage = new TeleMessage(cmd_type, messageId, lvId, count, altitude, longitude, latitude, temperature, timeToOrbit, DateTime.UtcNow);
-        //            var json = JsonSerializer.Serialize(teleMessage);
-        //            var eventMessage = new EventMessage(messageId, json, DateTime.UtcNow);
-        //            var eventMessageJson = JsonSerializer.Serialize(eventMessage); // Serialize message to Json
-        //            var messageBytes = Encoding.UTF8.GetBytes(eventMessageJson);
-        //            var message = new Message(messageBytes, messageId, "application/json"); // Adapter design pattern
-        //            messageBrokerPublisher.Publish(message);
-        //            //Console.WriteLine($"{messageId}: {eventMessageJson}\n");
-
-        //            Thread.Sleep(1000);
-        //            // Update with random values
-        //            messageId = Guid.NewGuid().ToString("N");
-        //            altitude += random.NextDouble();
-        //            longitude -= 10d + random.NextDouble(); ;
-        //            latitude -= 10d - random.NextDouble(); ;
-        //            temperature -= random.NextDouble();
-
-        //            if (lvId < 4)
-        //            {
-        //                if (timeToOrbit > 0d)
-        //                    timeToOrbit -= 1d;
-        //                else if (timeToOrbit <= 0d)
-        //                {
-        //                    if (!alerted) // Send alert to DSN  
-        //                    {
-        //                        Console.WriteLine("Sending reached orbit alert");
-        //                        updateStatus("Reached Orbit Alert", lvId, "Reached Orbit Alert", messageBrokerPublisher);
-        //                        alerted = true;
-        //                    }
-        //                }
-        //            }
-
-        //            if (ct.IsCancellationRequested)
-        //            {
-        //                Console.WriteLine("Task {0} cancelled", taskNum);
-        //                break;
-        //            }
-        //        }
-        //    }
-        //}
-
-        //private static void SimulateScienceData(string messageId, string jsonMsg, DateTime time, PublisherBase messageBrokerPublisher)
-        //{
-
-        //}
-
-        //private static void Publish(string messageId, string jsonMsg, DateTime time, PublisherBase messageBrokerPublisher)
-        //{
-        //    var eventMessage = new EventMessage(messageId, jsonMsg, time);
-        //    var eventMessageJson = JsonSerializer.Serialize(eventMessage); // Serialize message to Json
-        //    var messageBytes = Encoding.UTF8.GetBytes(eventMessageJson);
-        //    var message = new Message(messageBytes, messageId, "application/json"); // Adapter design pattern
-        //    messageBrokerPublisher.Publish(message);
-        //    //Console.WriteLine($"{messageId}: {eventMessageJson}\n");
-        //}
-
-        private static Task<int> RunProcessAsync(string fileName, int lvId)
+        private static void seedData(int taskNum, PublisherBase messageBrokerPublisher, int lvId, CancellationToken ct)
         {
-            var config = GetConfiguration(lvId);
-            var launchVehicle = config["Name"];
-            var orbit = config["Orbit"];
-            var tcs = new TaskCompletionSource<int>();
+            Console.WriteLine("seed data");
+            var settings = GetConfiguration(lvId + 3);
+            var type = settings["Type"];
+            Console.WriteLine("Type: " + type);
 
-            var process = new Process
+            switch (type)
             {
-                StartInfo = { FileName = fileName, Arguments = $"{launchVehicle} {orbit}" },
-                EnableRaisingEvents = true
-            };
+                case "Scientific":
+                    SimulateScienceData(taskNum, messageBrokerPublisher, lvId, ct, settings);
+                    break;
 
-            process.Exited += (sender, args) =>
-            {
-                tcs.SetResult(process.ExitCode);
-                process.Dispose();
-            };
+                case "Communication":
+                    SimulateCommData(taskNum, messageBrokerPublisher, lvId, ct, settings);
+                    break;
 
-            process.Start();
-
-            return tcs.Task;
+                case "Spy":
+                    SimulateSpyData(taskNum, messageBrokerPublisher, lvId, ct, settings);
+                    break;
+            }
         }
 
-        private static NameValueCollection GetConfiguration(int lvId)
+        private static void SimulateScienceData(int taskNum, PublisherBase messageBrokerPublisher, int lvId, CancellationToken ct, NameValueCollection settings)
         {
-            Dictionary<int, string> source = new Dictionary<int, string>(6);
-            source.Add(1, "Bird-9");
-            source.Add(2, "Bird-Heavy");
-            source.Add(3, "Hawk-Heavy");
-            source.Add(4, "GPM");
-            source.Add(5, "TDRS-11");
-            source.Add(6, "RO-245");
+            var maxIterations = 500;
+            Random random = new Random();
+            var interval = Int32.Parse(settings["Data-interval"]) * 1000;
+            var rainfall = 34.0;
+            var humidity = 56.0;
+            var snow = 3.0;
+            Console.WriteLine("interval: " + interval);
 
-            string group = lvId < 4 ? "LaunchGroup" : "PayloadGroup";            
-            var settings = ConfigurationManager.GetSection(group + "/" + source[lvId] + "-Settings") as NameValueCollection;
+            while (!ct.IsCancellationRequested)
+            {
+                for (int i = 0; i <= maxIterations; i++)
+                {
+                    Console.WriteLine(i);
+                    var messageId = Guid.NewGuid().ToString("N");
+                    var time = DateTime.UtcNow;
+                    var scidata = new SciData(messageId, rainfall, humidity, snow, time);
+                    var json = JsonSerializer.Serialize(scidata);
+                    Publish(messageId, json, time, messageBrokerPublisher);
 
-            return settings;
+                    Thread.Sleep(interval);
+                    // Update with random values
+                    messageId = Guid.NewGuid().ToString("N");
+                    //altitude += random.NextDouble();
+                    //longitude -= 10d + random.NextDouble(); ;
+                    //latitude -= 10d - random.NextDouble(); ;
+                    //temperature -= random.NextDouble();
+
+                    if (ct.IsCancellationRequested)
+                    {
+                        Console.WriteLine("Task {0} cancelled", taskNum);
+                        break;
+                    }
+                }
+            }
+        }
+        private static void SimulateCommData(int taskNum, PublisherBase messageBrokerPublisher, int lvId, CancellationToken ct, NameValueCollection settings)
+        {
+            var maxIterations = 500;
+            Random random = new Random();
+            var interval = Int32.Parse(settings["Data-interval"]) * 1000;
+            var uplink = 40.0;
+            var downlink = 6700.0;
+            var activeTransponders = 65.0;
+            Console.WriteLine("interval: " + interval);
+
+            while (!ct.IsCancellationRequested)
+            {
+                for (int i = 0; i <= maxIterations; i++)
+                {
+                    Console.WriteLine(i);
+                    var messageId = Guid.NewGuid().ToString("N");
+                    var time = DateTime.UtcNow;
+                    var commdata = new CommData(messageId, uplink, downlink, activeTransponders, time);
+                    var json = JsonSerializer.Serialize(commdata);
+                    Publish(messageId, json, time, messageBrokerPublisher);
+
+                    Thread.Sleep(interval);
+                    // Update with random values
+                    messageId = Guid.NewGuid().ToString("N");
+                    //altitude += random.NextDouble();
+                    //longitude -= 10d + random.NextDouble(); ;
+                    //latitude -= 10d - random.NextDouble(); ;
+                    //temperature -= random.NextDouble();
+
+                    if (ct.IsCancellationRequested)
+                    {
+                        Console.WriteLine("Task {0} cancelled", taskNum);
+                        break;
+                    }
+                }
+            }
         }
 
-        private static NameValueCollection TestConfiguration()
+        private static void SimulateSpyData(int taskNum, PublisherBase messageBrokerPublisher, int lvId, CancellationToken ct, NameValueCollection settings)
         {
-            ////// Read a particular key from the config file 
-            var Bird9Settings = ConfigurationManager.GetSection("LaunchGroup/Bird-9-Settings") as NameValueCollection;
-            var BirdHeavySettings = ConfigurationManager.GetSection("LaunchGroup/Bird-Heavy-Settings") as NameValueCollection;
-            var HawkHeavySettings = ConfigurationManager.GetSection("LaunchGroup/Hawk-Heavy-Settings") as NameValueCollection;
-            var GPMSettings = ConfigurationManager.GetSection("PayloadGroup/GPM-Settings") as NameValueCollection;
-            var TDRS11Settings = ConfigurationManager.GetSection("PayloadGroup/TDRS-11-Settings") as NameValueCollection;
-            var RO245Settings = ConfigurationManager.GetSection("PayloadGroup/RO-245-Settings") as NameValueCollection;
+            var maxIterations = 500;
+            Random random = new Random();
+            var interval = Int32.Parse(settings["Data-interval"]) * 1000;
+            var imgUrl = "https://mars.nasa.gov/msl-raw-images/proj/msl/redops/ods/surface/sol/01000/opgs/edr/rcam/RLB_486265291EDR_F0481570RHAZ00323M_.JPG";
+            Console.WriteLine("interval: " + interval);
 
-            //Console.WriteLine(Bird9Settings["Orbit"]);
-            return GPMSettings;
+            while (!ct.IsCancellationRequested)
+            {
+                for (int i = 0; i <= maxIterations; i++)
+                {
+                    Console.WriteLine(i);
+                    var messageId = Guid.NewGuid().ToString("N");
+                    var time = DateTime.UtcNow;
+                    var spydata = new SpyData(messageId, imgUrl, time);
+                    var json = JsonSerializer.Serialize(spydata);
+                    Publish(messageId, json, time, messageBrokerPublisher);
 
-            //foreach (var key in Bird9Settings.AllKeys)
-            //{
-            //    Console.WriteLine(key + " = " + Bird9Settings[key]);
-            //}
-            //foreach (var key in BirdHeavySettings.AllKeys)
-            //{
-            //    Console.WriteLine(key + " = " + BirdHeavySettings[key]);
-            //}
-            //foreach (var key in HawkHeavySettings.AllKeys)
-            //{
-            //    Console.WriteLine(key + " = " + HawkHeavySettings[key]);
-            //}
-            //foreach (var key in GPMSettings.AllKeys)
-            //{
-            //    Console.WriteLine(key + " = " + GPMSettings[key]);
-            //}
-            //foreach (var key in TDRS11Settings.AllKeys)
-            //{
-            //    Console.WriteLine(key + " = " + TDRS11Settings[key]);
-            //}
-            //foreach (var key in RO245Settings.AllKeys)
-            //{
-            //    Console.WriteLine(key + " = " + RO245Settings[key]);
-            //}
+                    Thread.Sleep(interval);
+                    // Update with random values
+                    messageId = Guid.NewGuid().ToString("N");
+                    //altitude += random.NextDouble();
+                    //longitude -= 10d + random.NextDouble(); ;
+                    //latitude -= 10d - random.NextDouble(); ;
+                    //temperature -= random.NextDouble();
+
+                    if (ct.IsCancellationRequested)
+                    {
+                        Console.WriteLine("Task {0} cancelled", taskNum);
+                        break;
+                    }
+                }
+            }
         }
 
         private static IEnumerable<string> GetTitles(string filename)

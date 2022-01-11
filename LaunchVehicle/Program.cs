@@ -121,10 +121,12 @@ namespace LaunchVehicle
                 }
 
                 // Display status of all tasks.
+                Console.WriteLine("Displaying status of all tasks: ");
                 foreach (var task in tasks)
                     Console.WriteLine("Task {0} status is now {1}", task.Id, task.Status);
+                Console.WriteLine();
 
-                await subs.Acknowledge(messageReceivedEventArgs.AcknowledgeToken);
+               await subs.Acknowledge(messageReceivedEventArgs.AcknowledgeToken);
             });
 
             Console.WriteLine("Waiting to Start Publishing Messages");
@@ -135,6 +137,7 @@ namespace LaunchVehicle
             }
             while (true);
         }
+
         static async Task<String> GetNasaPhotoAsync()
         {
             var imgurl = "";
@@ -272,7 +275,7 @@ namespace LaunchVehicle
                         {
                             if (!alerted) // Send alert to DSN  
                             {
-                                Console.WriteLine("Sending reached orbit alert");
+                                //Console.WriteLine("Sending reached orbit alert");
                                 updateStatus("Reached Orbit Alert", lvId, "Reached Orbit Alert", messageBrokerPublisher);
                                 alerted = true;
                             }

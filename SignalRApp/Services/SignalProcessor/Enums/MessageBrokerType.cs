@@ -1,4 +1,4 @@
 ﻿namespace SignalRApp
 {
-    public enum MessageBrokerType { ServiceBus, RabbitMq, Console } // ServiceBus
+    public enum MessageBrokerType { ServiceBus, RabbitMq, Console } 
 }
